@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { use, useEffect } from 'react';
 import Menu from './Menu'; // Adjust the import path as necessary
 import axios from 'axios';
 import { Baseurl } from './Baseurl'; // Uncomment if you need to use Baseurl
@@ -7,8 +7,10 @@ function InputPrice() {
 
     // State for main types
     const [mainTypes, setMainTypes] = React.useState([]);
+    const [result, setResult] = React.useState([]); // State for results if needed
     const [dataProducts, setDataProducts] = React.useState([]); // State for products if needed
     const [unit, setUnit] = React.useState([]); // State for units if needed
+
     const [loading, setLoading] = React.useState(false);
 
     // Fetch main types from backend
@@ -47,6 +49,18 @@ function InputPrice() {
             });
     }, []);
 
+
+    useEffect(() => {
+        axios.get(Baseurl + '/app_result')
+            .then(response => {
+                console.log('Fetched results:', response.data[0]);
+                setResult(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching results:', error);
+            });
+    }, []);
+
     useEffect(() => {
         axios.get(Baseurl + '/app_unit')
             .then(response => {
@@ -58,6 +72,9 @@ function InputPrice() {
                 console.error('Error fetching units:', error);
             });
     }, []);
+
+
+   
 
 
     useEffect(() => {
@@ -98,7 +115,7 @@ function InputPrice() {
                 <main className="col p-4 d-flex flex-column align-items-center justify-content-start">
                     <h2 className="display-5 fw-bold mb-4 text-center text-primary kanit-light">Input Price</h2>
                     <div className="row w-100 mb-4">
-                        <div className="col-md-6 mb-3">
+                        <div className="col-md-4 mb-3">
                             <label htmlFor="price-date" className="form-label">Date</label>
                             <input
                                 type="date"
@@ -109,7 +126,7 @@ function InputPrice() {
                                 className="form-control"
                             />
                         </div>
-                        <div className="col-md-6 mb-3">
+                        <div className="col-md-4 mb-3">
                             <label htmlFor="main-type" className="form-label kanit-light">ประเภทหลัก</label>
                             <select
                                 id="main-type"
@@ -125,7 +142,34 @@ function InputPrice() {
                                 ))}
                             </select>
                         </div>
+                        <div className="col-md-4 mb-3">
+                            <label htmlFor="source-type" className="form-label kanit-light">แหล่งที่มา</label>
+                            <select
+                                id="source-type"
+                                name="source-type"
+                                className="form-select"
+                                // You may want to add a separate handler for this select
+                            >
+                                <option value="0">เลือกแหล่งที่มา</option>
+                                {result.map((result, index) => (
+                                    <option key={index} value={result.id}>
+                                        {result.name_result}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
+                    <button
+                        type="button"
+                        className="btn btn-secondary mb-3"
+                        style={{ alignSelf: 'flex-end' }}
+                        onClick={() => {
+                            const target = document.body.scrollHeight - window.innerHeight;
+                            window.scrollTo({ top: target, behavior: 'smooth' });
+                        }}
+                    >
+                        เลื่อนไปด้านล่าง
+                    </button>
                     <div className="card w-100 shadow-sm">
                         <div className="card-body">
                             <h3 className="h5 mb-4">Products</h3>
@@ -189,6 +233,14 @@ function InputPrice() {
                     </div>
                 </main>
             </div>
+            <button
+                type="button"
+                className="btn btn-primary position-fixed"
+                style={{ bottom: '30px', right: '30px', zIndex: 1000 }}
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
+                เลื่อนไปด้านบน
+            </button>
         </div>
     );
 }
