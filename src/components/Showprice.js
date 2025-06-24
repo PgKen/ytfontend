@@ -3,13 +3,15 @@ import Menu from './Menu'; // Adjust the import path as necessary
 import axios from 'axios';
 import { Baseurl } from './Baseurl'; // Uncomment if you need to use Baseurl
 
-function InputPrice() {
+function Showprice() {
 
     // State for main types
+
     const [mainTypes, setMainTypes] = React.useState([]);
     const [result, setResult] = React.useState([]); // State for results if needed
+
+
     const [dataProducts, setDataProducts] = React.useState([]); // State for products if needed
-    const [unit, setUnit] = React.useState([]); // State for units if needed
 
     const [loading, setLoading] = React.useState(false);
 
@@ -18,7 +20,7 @@ function InputPrice() {
     function selectmaintypesid(id) {
         console.log('selectmaintypesid function called' + id);
         setLoading(true);
-        axios.get(`${Baseurl}/app_getmaintypes/${id}`)
+        axios.get(`${Baseurl}/app_showprice/${id}`)
             .then(response => {
                 console.log('Fetched maintype data:', response.data);
                 // You can set state here if you want to use the data
@@ -60,22 +62,6 @@ function InputPrice() {
                 console.error('Error fetching results:', error);
             });
     }, []);
-
-    useEffect(() => {
-        axios.get(Baseurl + '/app_unit')
-            .then(response => {
-                console.log('Fetched units:', response.data);
-
-                setUnit(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching units:', error);
-            });
-    }, []);
-
-
-
-
 
     useEffect(() => {
 
@@ -148,9 +134,9 @@ function InputPrice() {
                     <Menu />
                 </aside>
                 <main className="col p-4 d-flex flex-column align-items-center justify-content-start">
-                    <h2 className="display-5 fw-bold mb-4 text-center text-primary kanit-light">Input Price</h2>
+                    <h2 className="display-5 fw-bold mb-4 text-center text-primary kanit-light">Show Price</h2>
                     <div className="row w-100 mb-4">
-                        <div className="col-md-4 mb-3">
+                        <div className="col-md-3 mb-3">
                             <label htmlFor="price-date" className="form-label">Date</label>
                             <input
                                 type="date"
@@ -161,7 +147,7 @@ function InputPrice() {
                                 className="form-control"
                             />
                         </div>
-                        <div className="col-md-4 mb-3">
+                        <div className="col-md-3 mb-3">
                             <label htmlFor="main-type" className="form-label kanit-light">ประเภทหลัก</label>
                             <select
                                 id="main-type"
@@ -171,6 +157,7 @@ function InputPrice() {
                                 value={mainTypeValue}
                             >
                                 <option value="0">เลือกประเภท</option>
+                                <option value="-1">เลือกทั้งหมด</option>
                                 {mainTypes.map((type, index) => (
                                     <option key={index} value={type.id}>
                                         {type.name_maintype}
@@ -181,7 +168,7 @@ function InputPrice() {
                                 <div className="text-danger small mt-1">{mainTypeError}</div>
                             )}
                         </div>
-                        <div className="col-md-4 mb-3">
+                        <div className="col-md-3 mb-3">
                             <label htmlFor="source-type" className="form-label kanit-light">แหล่งที่มา</label>
                             <select
                                 id="source-type"
@@ -191,6 +178,7 @@ function InputPrice() {
                                 onChange={handleSourceTypeChange}
                             >
                                 <option value="0">เลือกแหล่งที่มา</option>
+                                <option value="-1">เลือกทั้งหมด</option>
                                 {result.map((result, index) => (
                                     <option key={index} value={result.id}>
                                         {result.name_result}
@@ -200,6 +188,45 @@ function InputPrice() {
                             {sourceTypeError && (
                                 <div className="text-danger small mt-1">{sourceTypeError}</div>
                             )}
+                        </div>
+                        <div className="col-md-3 mb-3 d-flex align-items-end">
+                            <button
+                                type="button"
+                                className="btn btn-success w-100"
+                                disabled={isSubmitDisabled}
+                                onClick={async () => {
+                                    setLoading(true);
+                                    let hasError = false;
+                                    if (mainTypeValue === "0") {
+                                        setMainTypeError('กรุณาเลือกประเภทหลัก');
+                                        hasError = true;
+                                    }
+                                    if (sourceTypeValue === "0") {
+                                        setSourceTypeError('กรุณาเลือกแหล่งที่มา');
+                                        hasError = true;
+                                    }
+                                    if (hasError) return;
+
+                                    try {
+                                        const response = await axios.post(`${Baseurl}/app_showprice`, {
+                                            date: date,
+                                            id_result: sourceTypeValue,
+                                            id_maintype: mainTypeValue,
+                                        });
+                                        if (response.data && response.status === 200) {
+                                            setLoading(false);
+                                            setDataProducts(response.data);
+                                        } else {
+                                            alert('เกิดข้อผิดพลาดในการบันทึก');
+                                        }
+                                    } catch (error) {
+                                        alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+                                        console.error(error);
+                                    }
+                                }}
+                            >
+                                ตกลง
+                            </button>
                         </div>
                     </div>
                     <button
@@ -222,51 +249,24 @@ function InputPrice() {
                                 <table className="table table-bordered table-hover align-middle">
                                     <thead className="table-light">
                                         <tr>
-                                            {/* <th>Product ID</th> */}
-                                            <th>Product Name</th>
-                                            <th>Price</th>
-                                            <th>Unit</th>
+                                            <th>ชื่อสินค้า</th>
+                                            <th>ราคา</th>
+                                            <th>แหล่งที่มา</th>
+                                            {/* <th>id_result_array</th> */}
+                                            {/* <th>price_array</th> */}
+                                            <th>หน่วย</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {dataProducts.map((product, index) => (
                                             <tr key={index}>
-                                                {/* <td>{product.id_prod}</td> */}
                                                 <td>{product.name_pro}</td>
-                                                <td>
-                                                    <input
-                                                        type="number"
-                                                        className="form-control"
-                                                        placeholder="Enter price"
-                                                        min="0"
-                                                        step="0.01"
-                                                        onKeyDown={e => {
-                                                            if (e.key === 'Enter') {
-                                                                e.preventDefault();
-                                                                const next = document.querySelector(
-                                                                    `input[data-input-index='${index + 1}-0']`
-                                                                );
-                                                                if (next) next.focus();
-                                                            }
-                                                        }}
-                                                        data-input-index={`${index}-0`}
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <select
-                                                        className="form-select"
-                                                        value={product.id_unit || ''}
-                                                        onChange={e => console.log(`Selected unit for product ${product.id_prod}: ${e.target.value}`)}
-                                                    >
-                                                        <option value="">Select unit</option>
-                                                        {unit.map((u, idx) => (
-                                                            <option key={idx} value={u.id_unit}>
-                                                                {u.unitname}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </td>
-
+                                                <td>{product.price_array}</td>
+                                                {/* <td>{product.price}</td> */}
+                                                <td>{product.id_result_array}</td>
+                                                {/* <td>{product.id_unit}</td> */}
+                                                {/* <td>xxx</td> */}
+                                                <td>{product.unitname}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -275,71 +275,6 @@ function InputPrice() {
                         </div>
                     </div>
                 </main>
-            </div>
-            <div className="d-flex justify-content-center mt-4 mb-4">
-                <button
-                    type="button"
-                    className="btn btn-success"
-                    disabled={isSubmitDisabled}
-                    onClick={async () => {
-                        // Validate before submit
-                        let hasError = false;
-                        if (mainTypeValue === "0") {
-                            setMainTypeError('กรุณาเลือกประเภทหลัก');
-                            hasError = true;
-                        }
-                        if (sourceTypeValue === "0") {
-                            setSourceTypeError('กรุณาเลือกแหล่งที่มา');
-                            hasError = true;
-                        }
-                        if (hasError) return;
-
-                        // Prepare data to send
-                        const payload = dataProducts.map((product, index) => {
-                            // Get price input value
-                            const priceInput = document.querySelector(`input[data-input-index='${index}-0']`);
-                            const price = priceInput ? priceInput.value : '';
-                            // Get selected unit value
-                            const unitSelect = priceInput
-                                ? priceInput.parentElement.nextSibling.querySelector('select')
-                                : null;
-                            const unitId = unitSelect ? unitSelect.value : '';
-                            return {
-                                id_prod: product.id_product,
-                                price: price,
-                                id_unit: unitId,
-                                date: date,
-                                id_result: sourceTypeValue,
-                            };
-                        });
-
-                        // Filter out products without price or unit
-                        const filteredPayload = payload.filter(
-                            item => item.price && item.id_unit
-                        );
-
-                        if (filteredPayload.length === 0) {
-                            alert('กรุณากรอกราคาสินค้าและเลือกหน่วยอย่างน้อย 1 รายการ');
-                            return;
-                        }
-
-                        try {
-                            const response = await axios.post(`${Baseurl}/app_saveprice`, {
-                                filteredPayload: filteredPayload,
-                            });
-                            if (response.data && response.data.success) {
-                                alert('บันทึกราคาสำเร็จ');
-                            } else {
-                                alert('เกิดข้อผิดพลาดในการบันทึก');
-                            }
-                        } catch (error) {
-                            alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
-                            console.error(error);
-                        }
-                    }}
-                >
-                    ตกลง
-                </button>
             </div>
             <button
                 type="button"
@@ -353,4 +288,4 @@ function InputPrice() {
     );
 }
 
-export default InputPrice;
+export default Showprice;

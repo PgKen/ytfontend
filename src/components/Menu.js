@@ -30,6 +30,12 @@ const Menu = () => {
                     <i className="bi bi-pencil-square me-2"></i> Input Price
                 </button>
                 <button
+                    className="btn btn-outline-light text-start mb-2"
+                    onClick={() => window.location.href = "/showprice"}
+                >
+                    <i className="bi bi-currency-dollar me-2"></i> Show Price
+                </button>
+                <button
                     className="btn btn-outline-danger text-start mt-auto"
                     onClick={handleLogout}
                 >
