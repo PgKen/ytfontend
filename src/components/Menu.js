@@ -37,9 +37,21 @@ const Menu = () => {
                 </button>
                 <button
                     className="btn btn-outline-light text-start mb-2"
+                    onClick={() => window.location.href = "/prompt"}
+                >
+                    <i className="bi bi-chat-dots me-2"></i> Prompt
+                </button>
+                <button
+                    className="btn btn-outline-light text-start mb-2"
                     onClick={() => window.location.href = "/uploadimg"}
                 >
                     <i className="bi bi-upload me-2"></i> Upload Img
+                </button>
+                <button
+                    className="btn btn-outline-light text-start mb-2"
+                    onClick={() => window.location.href = "/compareprices"}
+                >
+                    <i className="bi bi-bar-chart-line me-2"></i> Compare Prices
                 </button>
                 <button
                     className="btn btn-outline-danger text-start mt-auto"

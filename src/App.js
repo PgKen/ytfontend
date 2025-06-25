@@ -7,6 +7,8 @@ import Home from './components/Home'; // Uncomment if you have a Home component
 import InputPrice from './components/Inputprice'; // Uncomment if you have an InputPrice component
 import Showprice from './components/Showprice'; // Uncomment if you have a Showprice component
 import Uploadimg from './components/Uploadimg';
+import Prompt from './components/Prompt';
+import Compareprices from './components/Compareprices';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 // import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -23,6 +25,8 @@ function App() {
         <Route path="/inputprice" element={<InputPrice />} />
         <Route path="/showprice" element={<Showprice />} />
         <Route path="/uploadimg" element={<Uploadimg />} />
+        <Route path="/prompt" element={<Prompt />} />
+        <Route path="/compareprices" element={<Compareprices />} />
         {/* Add more routes as needed */}
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
