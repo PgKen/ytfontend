@@ -10,6 +10,8 @@ function Showprice() {
     const [mainTypes, setMainTypes] = React.useState([]);
     const [result, setResult] = React.useState([]); // State for results if needed
 
+    const [indexImg, setIndexImg] = React.useState(0); // State for image index
+
 
     const [dataProducts, setDataProducts] = React.useState([]); // State for products if needed
 
@@ -57,7 +59,7 @@ function Showprice() {
             .then(response => {
                 // Handle image list if needed
                 // Example: setImages(response.data);
-                console.log('Fetched images:', response.data);
+                console.log('Fetched images:', response.data[0].name_img);
                 setDataImges(response.data);
             })
             .catch(error => {
@@ -180,10 +182,10 @@ function Showprice() {
                     <Menu />
                 </aside>
                 <main className="col p-4 d-flex flex-column align-items-center justify-content-start">
-                    <h2 className="display-5 fw-bold mb-2 text-center text-primary kanit-light">ราคาผักวันนี้</h2>
+                    {/* <h2 className="display-5 fw-bold mb-2 text-center text-primary kanit-light">ราคาผักวันนี้</h2>
                     <div className="mb-4 text-center text-secondary">
                         ลงวันที่ {formatThaiDate(date)}
-                    </div>
+                    </div> */}
                     <div className="row w-100 mb-4">
                         {/* ... (form code unchanged) ... */}
                     </div>
@@ -211,6 +213,26 @@ function Showprice() {
                             >
                                 {showBg ? 'ปิดพื้นหลัง' : 'แสดงพื้นหลัง'}
                             </button>
+                            {/* ปุ่มเปลี่ยนรูปพื้นหลัง */}
+                            <button
+                                type="button"
+                                className="btn btn-outline-primary btn-sm"
+                                onClick={() => setIndexImg(i => Math.max(0, i - 1))}
+                                disabled={indexImg <= 0}
+                            >
+                                &lt; รูปก่อนหน้า
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-outline-primary btn-sm"
+                                onClick={() => setIndexImg(i => (dataImges.length > 0 ? Math.min(dataImges.length - 1, i + 1) : 0))}
+                                disabled={indexImg >= dataImges.length - 1}
+                            >
+                                รูปถัดไป &gt;
+                            </button>
+                            <span className="align-self-center small text-secondary ms-2">
+                                {dataImges.length > 0 ? `รูปที่ ${indexImg + 1} / ${dataImges.length}` : ''}
+                            </span>
                         </div>
 
                         {loading ? (
@@ -227,24 +249,29 @@ function Showprice() {
                                             transition: 'width 0.3s',
                                             border: '1px solid #CCC',
                                             borderRadius: 8,
-                                            padding: '30px 60px',
-                                            backgroundImage: showBg && dataImges[0]?.name_img ? `url(${Baseurl}/upload/${dataImges[0].name_img})` : 'none',
+                                            padding: '30px 40px',
+                                            // backgroundImage: showBg && dataImges.length > 0 && dataImges[0]?.name_img ? `url(http://localhost:4222/upload/${encodeURIComponent(dataImges[0].name_img)})` : 'none',
+                                            // backgroundImage: showBg && dataImges[0]?.name_img ? `url('http://localhost:4222/upload/image%20(11)_20250625_212337-528746713.png')` : 'none',
+                                            backgroundImage: showBg && dataImges[0]?.name_img ? `url('${Baseurl}/upload/${dataImges[indexImg].name_img}')` : 'none',
                                             backgroundSize: 'cover',
                                             backgroundRepeat: 'no-repeat',
-                                            backgroundPosition: 'center',
-                                            backgroundColor: showBg
-                                                ? 'rgba(255,255,255,0.85)' // สีขาวโปร่งใส เหมาะกับตัวอักษรสีเข้ม
-                                                : '#f8fafc', // สีพื้นอ่อนสำหรับไม่มีภาพ
-                                            // ตัวอักษรสีเข้มอ่านง่าย
+                                            backgroundPosition: 'top center',
                                             boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                                            opacity: 0.85 // ลด Opacity เพื่อให้เห็นภาพ background ด้านหลังมากขึ้น
+                                            opacity: 0.70 // ลด Opacity เพื่อให้เห็นภาพ background ด้านหลังมากขึ้น
                                         }}
+
+
                                     >
                                         <h2 className="mb-3 fw-bold  text-primary">
                                             <span style={{ backgroundColor: '#e3f0fa', color: '#1a237e', borderRadius: 4, padding: '0 8px' }}>
                                                 &nbsp;ราคา {mainType}&nbsp;วันนี้&nbsp;
                                             </span>
                                         </h2>
+                                        {/* <img src={`${Baseurl}/upload/${dataImges[0]?.name_img}`}
+                                            alt="Background"
+                                            className="img-fluid mb-3"
+                                            style={{ maxHeight: 200, objectFit: 'cover', borderRadius: 8 }}
+                                        /> */}
                                         <h4 className="mb-3 text-success">
                                             <span style={{ backgroundColor: '#e3f0fa', color: '#1a237e', borderRadius: 4, padding: '0 8px' }}>
                                                 ลงวันที่ {formatThaiDate(date)}
@@ -260,39 +287,39 @@ function Showprice() {
                                                 >
                                                     <tr>
                                                         <th
-                                                            style={{ background: 'rgba(207,226,255,0.85)' }}
+                                                            style={{ background: 'rgba(207,226,255,0.70)' }}
                                                         >#</th>
                                                         <th
                                                             className="text-center align-middle"
-                                                            style={{ background: 'rgba(207,226,255,0.85)' }}
+                                                            style={{ background: 'rgba(207,226,255,0.70)' }}
                                                         >รายการ</th>
                                                         {/* <th>ประเภทหลัก</th> */}
                                                         <th
                                                             className="text-center align-middle"
-                                                            style={{ background: 'rgba(207,226,255,0.85)' }} // ลด Opacity ของหัวตาราง
+                                                            style={{ background: 'rgba(207,226,255,0.70)' }} // ลด Opacity ของหัวตาราง
                                                         >
                                                             ตลาดศรีเมือง</th>
                                                         <th
                                                             className="text-center align-middle"
                                                             style={{
-                                                                background: 'rgba(207,226,255,0.85)'
+                                                                background: 'rgba(207,226,255,0.70)'
                                                             }}
                                                         >ตลาดไท</th>
                                                         <th
                                                             className="text-center align-middle"
                                                             style={{
-                                                                background: 'rgba(207,226,255,0.85)'
+                                                                background: 'rgba(207,226,255,0.70)'
                                                             }}
                                                         >ตลาดสี่มุมเมือง</th>
                                                         <th
                                                             className="text-center align-middle"
                                                             style={{
-                                                                background: 'rgba(207,226,255,0.85)'
+                                                                background: 'rgba(207,226,255,0.70)'
                                                             }}
                                                         >ราคาสำรวจ</th>
                                                         <th
                                                             className="text-center align-middle"
-                                                            style={{ background: 'rgba(207,226,255,0.85)' }}
+                                                            style={{ background: 'rgba(207,226,255,0.70)' }}
                                                         >หน่วย</th>
                                                     </tr>
                                                 </thead>
@@ -331,14 +358,14 @@ function Showprice() {
 
                                                         const row = (
                                                             <tr key={item.id_product}>
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{globalIndex}</td>
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{item.name_pro || '-'}</td>
+                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{globalIndex}</td>
+                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{item.name_pro || '-'}</td>
                                                                 {/* <td>{item. || '-'}</td> */}
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{priceSrimuang}</td>
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{priceTai}</td>
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{priceSimummuang}</td>
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{priceSurvey}</td>
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>บาท&nbsp;/&nbsp;{item.unitname || '-'}</td>
+                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceSrimuang}</td>
+                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceTai}</td>
+                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceSimummuang}</td>
+                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceSurvey}</td>
+                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>บาท&nbsp;/&nbsp;{item.unitname || '-'}</td>
                                                             </tr>
                                                         );
                                                         globalIndex++;

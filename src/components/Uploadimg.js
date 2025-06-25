@@ -32,6 +32,8 @@ function Uploadimg({ onUpload }) {
       setListLoading(true);
       try {
         const response = await axios.get(`${Baseurl}/app_listimg`);
+        console.log("Images fetched:", response.data);
+        
         setImages(response.data || []);
       } catch (error) {
         setImages([]);
@@ -127,6 +129,7 @@ function Uploadimg({ onUpload }) {
                     <div className="card h-100">
                       <img
                         src={"http://localhost:4222/upload/" + img.name_img}
+                        // src={"http://localhost:4222/upload/image%20(11)_20250625_212337-528746713.png"}
                         alt={`img-${img.id}`}
                         className="card-img-top"
                         style={{ objectFit: "cover", height: 150 }}
