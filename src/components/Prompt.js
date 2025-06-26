@@ -70,10 +70,10 @@ function Prompt() {
                     <Menu />
                 </aside>
                 <main className="col p-4 d-flex flex-column align-items-center justify-content-start">
-                    <h2 className="display-5 fw-bold mb-2 text-center text-primary kanit-light">รายการ Prompt</h2>
-                    <div className="mb-4 text-center text-secondary">
+                    <h4 className="fw-bold mb-2 text-center text-primary kanit-light" style={{ fontSize: 26 }}>รายการ Prompt</h4>
+                    {/* <div className="mb-4 text-center text-secondary">
                         อัปเดตล่าสุด {prompts[0]?.created_at ? formatThaiDate(prompts[0].created_at) : '-'}
-                    </div>
+                    </div> */}
                     <div className="w-100">
                         <div className="mb-2 d-flex justify-content-end gap-2">
                             <button

@@ -1,9 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Menu from "./Menu";
 import axios from "axios";
-import { Baseurl } from "./Baseurl";
+import { Baseurl, msg } from "./Baseurl";
+import domtoimage from "dom-to-image";
 
 function Compareprices() {
+
+  const captureRef = useRef();
+  const handleCapture = () => {
+    domtoimage.toPng(captureRef.current)
+      .then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = 'capture.png';
+        link.href = dataUrl;
+        link.click();
+      });
+  };
+
   const [dataToday, setDataToday] = useState([]);
   const [dataYesterday, setDataYesterday] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -11,6 +24,9 @@ function Compareprices() {
   const [showBg, setShowBg] = useState(false);
   const [dataImges, setDataImges] = useState([]);
   const [indexImg, setIndexImg] = useState(0);
+  const [results, setResults] = useState([]); // tb_result
+  const [selectedResult, setSelectedResult] = useState("1");
+  const [showMsg, setShowMsg] = useState(true);
 
   // วันที่วันนี้และเมื่อวาน
   const today = new Date();
@@ -21,10 +37,19 @@ function Compareprices() {
   const yesterdayStr = formatDate(yesterday);
 
   useEffect(() => {
+    // ดึง tb_result สำหรับ select
+    axios.get(`${Baseurl}/app_result`).then((res) => {
+      setResults(res.data);
+    });
+  }, []);
+
+  useEffect(() => {
     setLoading(true);
     // ดึงราคาวันนี้
     axios
-      .get(Baseurl + "/app_listproducts")
+      .get(Baseurl + "/app_listproducts", {
+        params: { id_result: selectedResult },
+      })
       .then((response) => {
         setDataToday(response.data);
         setLoading(false);
@@ -33,16 +58,18 @@ function Compareprices() {
         setLoading(false);
         console.error("Error fetching today prices:", error);
       });
-    // ดึงราคาของเมื่อวาน (สมมุติว่ามี endpoint /app_listproducts?date=YYYY-MM-DD)
+    // ดึงราคาของเมื่อวาน
     axios
-      .get(Baseurl + "/app_listproducts_yeserday?date=" + yesterdayStr)
+      .get(Baseurl + "/app_listproducts_yeserday", {
+        params: { date: yesterdayStr, id_result: selectedResult },
+      })
       .then((response) => {
         setDataYesterday(response.data);
       })
       .catch((error) => {
         console.error("Error fetching yesterday prices:", error);
       });
-  }, []);
+  }, [selectedResult]);
 
   useEffect(() => {
     axios
@@ -101,15 +128,39 @@ function Compareprices() {
           <Menu />
         </aside>
         <main className="col p-4 d-flex flex-column align-items-center justify-content-start">
-          {/* <h2 className="display-5 fw-bold mb-2 text-center text-primary kanit-light">
-            เปรียบเทียบราคาสินค้า วันนี้ vs เมื่อวาน
-          </h2> */}
-          {/* <div className="mb-4 text-center text-secondary">
-            วันนี้: {formatThaiDate(todayStr)} | เมื่อวาน:{" "}
-            {formatThaiDate(yesterdayStr)}
-          </div> */}
+          <div className="mb-3 w-100" style={{ maxWidth: 400 }}>
+            <label htmlFor="result-select" className="form-label">
+              เลือกแหล่งที่มา
+            </label>
+            <select
+              id="result-select"
+              className="form-select"
+              value={selectedResult}
+              onChange={(e) => setSelectedResult(e.target.value)}
+            >
+              {results.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name_result}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="w-100">
             <div className="mb-2 d-flex justify-content-end gap-2">
+              <button
+                type="button"
+                className="btn btn-outline-info btn-sm"
+                onClick={() => setShowMsg(v => !v)}
+                style={{ float: 'right' }}
+              >
+                {showMsg ? 'ซ่อนข้อความ' : 'แสดงข้อความ'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={handleCapture}>
+                แคปภาพส่วนนี้
+              </button>
               <button
                 type="button"
                 className="btn btn-outline-secondary btn-sm"
@@ -126,7 +177,8 @@ function Compareprices() {
               </button>
               <button
                 type="button"
-                className={`btn btn-${showBg ? "danger" : "success"} btn-sm`}
+                className={`btn btn-${showBg ? "danger" : "success"
+                  } btn-sm`}
                 onClick={() => setShowBg((v) => !v)}
               >
                 {showBg ? "ปิดพื้นหลัง" : "แสดงพื้นหลัง"}
@@ -172,12 +224,13 @@ function Compareprices() {
                     <div
                       key={mainType}
                       className="mb-5"
+                      ref={captureRef}
                       style={{
                         width: `${tableWidth}%`,
                         transition: "width 0.3s",
                         border: "1px solid #CCC",
                         borderRadius: 8,
-                        padding: "30px 100px",
+                        padding: "30px 40px",
                         // backgroundImage: showBg && dataImges[0]?.name_img ? `url(${Baseurl}/upload/${dataImges[0].name_img})` : 'none',
                         backgroundImage:
                           showBg && dataImges[0]?.name_img
@@ -217,9 +270,32 @@ function Compareprices() {
                         >
                           วันนี้: {formatThaiDate(todayStr)} | เมื่อวาน:{" "}
                           {formatThaiDate(yesterdayStr)}
+
                         </span>
+
+
                       </h6>
-                      <div className="table-responsive">
+
+                      <div className="mb-3">
+                        {showMsg && (
+                          <span className="text-success ms-2"
+                            style={{
+                              fontSize: '16px',
+                              textAlign: 'right',
+                              alignSelf: 'flex-end',
+                              display: 'block',
+                              width: '80%',
+                              backgroundColor: "#e3f0fa",
+                              marginLeft: 'auto',
+                              marginRight: 0,
+                              paddingRight: '10px',
+                            }}>
+                            {msg}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="table-responsive" >
                         <table
                           className="table table-bordered table-striped"
                           style={{ background: "rgba(255,255,255,0.4)" }}
@@ -268,11 +344,11 @@ function Compareprices() {
                               const yesterday = yesterdayMap[item.id_product];
                               const priceToday =
                                 item.result?.find(
-                                  (r) => r.name_result === "ตลาดศรีเมือง"
+                                  (r) => r.id_result == selectedResult
                                 )?.price ?? "-";
                               const priceYesterday =
                                 yesterday?.result?.find(
-                                  (r) => r.name_result === "ตลาดศรีเมือง"
+                                  (r) => r.id_result == selectedResult
                                 )?.price ?? "-";
                               let diff = "-";
                               let arrow = "";
@@ -369,18 +445,25 @@ function Compareprices() {
                             })}
                           </tbody>
                         </table>
-                        <div className="mt-3 text-secondary small text-center">
-                          <span
-                            style={{
-                              backgroundColor: "#e3f0fa",
-                            //   color: "#1a237e",
-                              borderRadius: 4,
-                              padding: "0 8px",
-                            }}
-                          >
-                            เปรียบเทียบราคาสินค้าระหว่างวันนี้และเมื่อวาน
-                            (เฉพาะตลาดศรีเมือง)
-                          </span>
+                        <div className="mt-3 text-secondary small text-center"
+                          style={{
+                            background: 'linear-gradient(90deg, #ffe066 0%, #ffd700 100%)',
+                            borderRadius: 8,
+                            padding: '4px 0',
+                            color: '#7a4f01',
+                            fontWeight: 'bold',
+                            letterSpacing: 0.5,
+                            boxShadow: '0 2px 8px rgba(255, 215, 0, 0.15)',
+                            width: '550px',
+                            margin: '0 auto',
+                          }}
+                        >
+
+                          {(() => {
+                            const found = results.find(r => r.id == selectedResult);
+                            return found ? `เปรียบเทียบราคาสินค้าระหว่างวันนี้และเมื่อวาน แหล่งข้อมูลจากเว็ปไซต์ของ ${found.name_result}` : "เปรียบเทียบราคาสินค้าระหว่างวันนี้และเมื่อวาน";
+                          })()}
+
                         </div>
                       </div>
                     </div>

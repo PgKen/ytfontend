@@ -54,6 +54,12 @@ const Menu = () => {
                     <i className="bi bi-bar-chart-line me-2"></i> Compare Prices
                 </button>
                 <button
+                    className="btn btn-outline-light text-start mb-2"
+                    onClick={() => window.location.href = "/vegetable-chart"}
+                >
+                    <i className="bi bi-graph-up-arrow me-2"></i> Vegetable Chart
+                </button>
+                <button
                     className="btn btn-outline-danger text-start mt-auto"
                     onClick={handleLogout}
                 >

@@ -13,27 +13,31 @@ function InputPrice() {
 
     const [loading, setLoading] = React.useState(false);
 
+    const [idMaintypes, setIdMaintypes] = React.useState(0); // State for selected main type ID
+    const [idSourceType, setIdSourceType] = React.useState(0); // State for selected source type ID
+
     // Fetch main types from backend
 
     function selectmaintypesid(id) {
         console.log('selectmaintypesid function called' + id);
-        setLoading(true);
-        axios.get(`${Baseurl}/app_getmaintypes/${id}`)
-            .then(response => {
-                console.log('Fetched maintype data:', response.data);
-                // You can set state here if you want to use the data
-                if (response.data.length === 0 || response.data === null) {
-                    setDataProducts([]);
-                    setLoading(false);
-                    return;
-                }
-                setLoading(false);
-                console.log('Setting data products:', response.data[0]);
-                setDataProducts(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching maintype by id:', error);
-            });
+        setIdMaintypes(id);
+        // setLoading(true);
+        // axios.get(`${Baseurl}/app_getmaintypes/${id}`)
+        //     .then(response => {
+        //         console.log('Fetched maintype data:', response.data);
+        //         // You can set state here if you want to use the data
+        //         if (response.data.length === 0 || response.data === null) {
+        //             setDataProducts([]);
+        //             setLoading(false);
+        //             return;
+        //         }
+        //         setLoading(false);
+        //         console.log('Setting data products:', response.data[0]);
+        //         setDataProducts(response.data);
+        //     })
+        //     .catch(error => {
+        //         console.error('Error fetching maintype by id:', error);
+        //     });
     }
 
 
@@ -130,16 +134,41 @@ function InputPrice() {
     // Update source type selection and validation
     function handleSourceTypeChange(e) {
         const value = e.target.value;
+        setIdSourceType(e.target.value);
         setSourceTypeValue(value);
         if (value === "0") {
             setSourceTypeError('กรุณาเลือกแหล่งที่มา');
         } else {
             setSourceTypeError('');
         }
+
+
+        setLoading(true);
+        // axios.get(`${Baseurl}/app_getmaintypes/${id}`)
+        axios.get(`${Baseurl}/app_getmaintypes/${idMaintypes}/${value}`)
+            .then(response => {
+                console.log('Fetched maintype data:', response.data);
+                // You can set state here if you want to use the data
+                if (response.data.length === 0 || response.data === null) {
+                    setDataProducts([]);
+                    setLoading(false);
+                    return;
+                }
+                setLoading(false);
+                console.log('Setting data products:', response.data[0]);
+                setDataProducts(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching maintype by id:', error);
+            });
+
     }
 
     // Check if submit should be disabled
     const isSubmitDisabled = mainTypeValue === "0" || sourceTypeValue === "0";
+
+    // State สำหรับเก็บราคาที่ผู้ใช้กรอก
+    const [priceInputs, setPriceInputs] = React.useState({});
 
     return (
         <div className="container-fluid min-vh-100 bg-light">
@@ -240,6 +269,17 @@ function InputPrice() {
                                                         placeholder="Enter price"
                                                         min="0"
                                                         step="0.01"
+                                                        value={
+                                                            priceInputs[product.id_product] !== undefined
+                                                                ? priceInputs[product.id_product]
+                                                                : (product.price_latest ?? '')
+                                                        }
+                                                        onChange={e => {
+                                                            setPriceInputs(inputs => ({
+                                                                ...inputs,
+                                                                [product.id_product]: e.target.value
+                                                            }));
+                                                        }}
                                                         onKeyDown={e => {
                                                             if (e.key === 'Enter') {
                                                                 e.preventDefault();
@@ -297,9 +337,11 @@ function InputPrice() {
                         // Prepare data to send
                         const payload = dataProducts.map((product, index) => {
                             // Get price input value
-                            const priceInput = document.querySelector(`input[data-input-index='${index}-0']`);
-                            const price = priceInput ? priceInput.value : '';
+                            const price = priceInputs[product.id_product] !== undefined
+                                ? priceInputs[product.id_product]
+                                : (product.price_latest ?? '');
                             // Get selected unit value
+                            const priceInput = document.querySelector(`input[data-input-index='${index}-0']`);
                             const unitSelect = priceInput
                                 ? priceInput.parentElement.nextSibling.querySelector('select')
                                 : null;

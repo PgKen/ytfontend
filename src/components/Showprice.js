@@ -1,7 +1,7 @@
-import React, { use, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Menu from './Menu'; // Adjust the import path as necessary
 import axios from 'axios';
-import { Baseurl } from './Baseurl'; // Uncomment if you need to use Baseurl
+import { Baseurl, msg } from './Baseurl'; // Uncomment if you need to use Baseurl
 
 function Showprice() {
 
@@ -16,6 +16,9 @@ function Showprice() {
     const [dataProducts, setDataProducts] = React.useState([]); // State for products if needed
 
     const [loading, setLoading] = React.useState(false);
+
+    const [showMsg, setShowMsg] = useState(true);
+
 
     // Fetch main types from backend
 
@@ -83,8 +86,8 @@ function Showprice() {
         console.log('Fetching products from backend...');
         axios.get(Baseurl + '/app_listproducts')
             .then(response => {
-                console.log('Fetched products Length:', response.data.length);
-                console.log('Fetched products:', response.data);
+                // console.log('Fetched products Length:', response.data.length);
+                // console.log('Fetched products:', response.data);
                 setDataProducts(response.data);
 
             })
@@ -191,7 +194,41 @@ function Showprice() {
                     </div>
 
                     <div className="w-100">
-                        <div className="mb-2 d-flex justify-content-end gap-2">
+                        <div className="mb-4 d-flex justify-content-end gap-2">
+                            <input
+                                type="date"
+                                className="form-control form-control-sm"
+                                style={{ maxWidth: 180, display: 'inline-block' }}
+                                value={date}
+                                onChange={e => setDate(e.target.value)}
+                            />
+                            <button
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                onClick={() => {
+                                    setLoading(true);
+                                    axios.get(`${Baseurl}/app_listproducts`, { params: { date } })
+                                        .then(response => {
+                                            setDataProducts(response.data);
+                                            setLoading(false);
+                                        })
+                                        .catch(error => {
+                                            console.error('Error fetching products by date:', error);
+                                            setLoading(false);
+                                        });
+                                }}
+                            >
+                                แสดงข้อมูล
+                            </button>
+                            &nbsp;&nbsp;
+                            <button
+                                type="button"
+                                className="btn btn-outline-info btn-sm"
+                                onClick={() => setShowMsg(v => !v)}
+                                style={{ float: 'right' }}
+                            >
+                                {showMsg ? 'ซ่อนข้อความ' : 'แสดงข้อความ'}
+                            </button>
                             <button
                                 type="button"
                                 className="btn btn-outline-secondary btn-sm"
@@ -250,6 +287,7 @@ function Showprice() {
                                             border: '1px solid #CCC',
                                             borderRadius: 8,
                                             padding: '30px 40px',
+
                                             // backgroundImage: showBg && dataImges.length > 0 && dataImges[0]?.name_img ? `url(http://localhost:4222/upload/${encodeURIComponent(dataImges[0].name_img)})` : 'none',
                                             // backgroundImage: showBg && dataImges[0]?.name_img ? `url('http://localhost:4222/upload/image%20(11)_20250625_212337-528746713.png')` : 'none',
                                             backgroundImage: showBg && dataImges[0]?.name_img ? `url('${Baseurl}/upload/${dataImges[indexImg].name_img}')` : 'none',
@@ -257,25 +295,51 @@ function Showprice() {
                                             backgroundRepeat: 'no-repeat',
                                             backgroundPosition: 'top center',
                                             boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                                            opacity: 0.70 // ลด Opacity เพื่อให้เห็นภาพ background ด้านหลังมากขึ้น
+                                            // ลด Opacity เพื่อให้เห็นภาพ background ด้านหลังมากขึ้น
                                         }}
 
-
                                     >
-                                        <h2 className="mb-3 fw-bold  text-primary">
+                                        <h2 className="mb-3 fw-bold text-primary">
                                             <span style={{ backgroundColor: '#e3f0fa', color: '#1a237e', borderRadius: 4, padding: '0 8px' }}>
-                                                &nbsp;ราคา {mainType}&nbsp;วันนี้&nbsp;
+                                                &nbsp;ราคา {mainType}
+                                                {(() => {
+                                                    const today = new Date();
+                                                    const yyyy = today.getFullYear();
+                                                    const mm = String(today.getMonth() + 1).padStart(2, '0');
+                                                    const dd = String(today.getDate()).padStart(2, '0');
+                                                    const todayStr = `${yyyy}-${mm}-${dd}`;
+                                                    return date === todayStr ? ' วันนี้ ' : '';
+                                                })()}
+                                                &nbsp;
                                             </span>
                                         </h2>
                                         {/* <img src={`${Baseurl}/upload/${dataImges[0]?.name_img}`}
-                                            alt="Background"
-                                            className="img-fluid mb-3"
-                                            style={{ maxHeight: 200, objectFit: 'cover', borderRadius: 8 }}
-                                        /> */}
+                                                                                        alt="Background"
+                                                                                        className="img-fluid mb-3"
+                                                                                        style={{ maxHeight: 200, objectFit: 'cover', borderRadius: 8 }}
+                                                                                    /> */}
                                         <h4 className="mb-3 text-success">
-                                            <span style={{ backgroundColor: '#e3f0fa', color: '#1a237e', borderRadius: 4, padding: '0 8px' }}>
+                                            <span style={{ backgroundColor: '#e3f0fa', color: '#1a237e', borderRadius: 4, padding: '0 8px', marginRight: 0, marginLeft: 0 }}>
                                                 ลงวันที่ {formatThaiDate(date)}
                                             </span>
+                                            <div className="mb-3">
+                                                {showMsg && (
+                                                    <span className="text-success ms-2"
+                                                        style={{
+                                                            fontSize: '16px',
+                                                            textAlign: 'right',
+                                                            alignSelf: 'flex-end',
+                                                            display: 'block',
+                                                            width: '80%',
+                                                            backgroundColor: "#e3f0fa",
+                                                            marginLeft: 'auto',
+                                                            marginRight: 0,
+                                                            paddingRight: '10px',
+                                                        }}>
+                                                        {msg}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </h4>
                                         <div className="table-responsive">
                                             <table
@@ -386,7 +450,9 @@ function Showprice() {
                                             >
                                                 ราคาอ้างอิงจากเว็ปไซต์ ตลาดศรีเมือง ตลาดไท ตลาดสี่มุมเมือง และการสำรวจตลาด
                                             </div>
+
                                         </div>
+
                                     </div>
                                 ));
                             })()
@@ -394,6 +460,8 @@ function Showprice() {
                     </div>
                 </main>
             </div>
+            <br />
+            <br />
             <button
                 type="button"
                 className="btn btn-primary position-fixed"
