@@ -17,7 +17,7 @@ function Showprice() {
 
     const [loading, setLoading] = React.useState(false);
 
-    const [showMsg, setShowMsg] = useState(true);
+    const [showMsg, setShowMsg] = useState(false);
 
 
     // Fetch main types from backend

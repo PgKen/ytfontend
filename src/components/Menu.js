@@ -60,6 +60,18 @@ const Menu = () => {
                     <i className="bi bi-graph-up-arrow me-2"></i> Vegetable Chart
                 </button>
                 <button
+                    className="btn btn-outline-light text-start mb-2"
+                    onClick={() => window.location.href = "/insertdata"}
+                >
+                    <i className="bi bi-file-earmark-plus me-2"></i> Insert Data
+                </button>
+                <button
+                    className="btn btn-outline-light text-start mb-2"
+                    onClick={() => window.location.href = "/showproductconf"}
+                >
+                    <i className="bi bi-gear me-2"></i> Product Config
+                </button>
+                <button
                     className="btn btn-outline-danger text-start mt-auto"
                     onClick={handleLogout}
                 >

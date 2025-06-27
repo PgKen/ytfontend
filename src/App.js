@@ -10,6 +10,8 @@ import Uploadimg from './components/Uploadimg';
 import Prompt from './components/Prompt';
 import Compareprices from './components/Compareprices';
 import VegetablePriceChart from './components/VegetablePriceChart';
+import Insertdata from './components/Insertdata';
+import Showproductconf from './components/Showproductconf';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 // import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -29,6 +31,8 @@ function App() {
         <Route path="/prompt" element={<Prompt />} />
         <Route path="/compareprices" element={<Compareprices />} />
         <Route path="/vegetable-chart" element={<VegetablePriceChart data={[]} />} />
+        <Route path="/insertdata" element={<Insertdata />} />
+        <Route path="/showproductconf" element={<Showproductconf />} />
         {/* Add more routes as needed */}
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
