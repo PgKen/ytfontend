@@ -15,6 +15,9 @@ function Showproductconf() {
     const [sortOrder, setSortOrder] = useState('asc');
     const [search, setSearch] = useState("");
     const [showOnly, setShowOnly] = useState(false);
+    const [promptList, setPromptList] = useState([]);
+    const [promptLoading, setPromptLoading] = useState(false);
+    const [promptError, setPromptError] = useState("");
 
     useEffect(() => {
         setLoading(true);
@@ -26,6 +29,20 @@ function Showproductconf() {
             })
             .catch(() => setLoading(false));
     }, [page, refresh, search]);
+
+    // ดึงรายการสินค้าสำหรับ prompt
+    useEffect(() => {
+        setPromptLoading(true);
+        axios.get(`${Baseurl}/app_product_req`)
+            .then(res => {
+                setPromptList(res.data || []);
+                setPromptLoading(false);
+            })
+            .catch(() => {
+                setPromptError("เกิดข้อผิดพลาดในการดึงข้อมูลสินค้า");
+                setPromptLoading(false);
+            });
+    }, []);
 
     const handleToggleStatus = async (id_product, currentStatus) => {
         try {
@@ -75,11 +92,11 @@ function Showproductconf() {
                 <main className="col p-4 d-flex flex-column align-items-center justify-content-start">
                     {/* <h4 className="display-3 fw-bold mb-4 text-center text-primary kanit-light">Show Product Config</h4> */}
                     <div className="card w-100 shadow-sm">
-                        
+
                         <div className="card-body">
                             <h3 className="h5 mb-4">Product List</h3>
                             <div className="mb-3 w-100 d-flex justify-content-end gap-2">
-                                
+
                                 <input
                                     type="text"
                                     className="form-control w-auto"
@@ -167,6 +184,28 @@ function Showproductconf() {
                                 </button>
                             </div>
                         </div>
+                    </div>
+                    <div className="boxprompt">
+                        <h3 className="h5 mt-4">Prompt Box</h3>
+                        {promptLoading ? (
+                            <div>กำลังโหลดรายการสินค้า...</div>
+                        ) : promptError ? (
+                            <div className="text-danger">{promptError}</div>
+                        ) : (
+                            <div>
+                                <div className="mb-2">คัดลอกข้อความนี้ไปใช้กับ AI เพื่อดึงราคาผักจากแต่ละตลาด (วันปัจจุบัน):</div>
+                                <pre className="bg-light p-2 rounded" style={{ fontFamily: 'inherit', fontSize: 15 }}>
+                                    {promptList.map(prod =>
+                                        [
+                                            `ตลาดไท-${prod.name_pro}-??-บาท/${prod.unitname}`,
+                                            `ตลาดศรีเมือง-${prod.name_pro}-??-บาท/${prod.unitname}`,
+                                            `ตลาดสี่มุมเมือง-${prod.name_pro}-??-บาท/${prod.unitname}`
+                                        ].join('\n')
+                                    ).join('\n')}
+                                </pre>
+                                <div className="small text-secondary">*แทนที่ ?? ด้วยราคาที่ได้จาก AI</div>
+                            </div>
+                        )}
                     </div>
                 </main>
             </div>

@@ -177,6 +177,10 @@ function Showprice() {
 
     const [tableWidth, setTableWidth] = React.useState(100);
     const [showBg, setShowBg] = React.useState(false);
+    const [showTai, setShowTai] = useState(true);
+    const [showSimummuang, setShowSimummuang] = useState(true);
+    const [showSrimuang, setShowSrimuang] = useState(true);
+    const [showSurvey, setShowSurvey] = useState(true);
 
     return (
         <div className="container-fluid min-vh-100 bg-light">
@@ -358,29 +362,30 @@ function Showprice() {
                                                             style={{ background: 'rgba(207,226,255,0.70)' }}
                                                         >รายการ</th>
                                                         {/* <th>ประเภทหลัก</th> */}
-                                                        <th
-                                                            className="text-center align-middle"
-                                                            style={{ background: 'rgba(207,226,255,0.70)' }} // ลด Opacity ของหัวตาราง
-                                                        >
-                                                            ตลาดศรีเมือง</th>
-                                                        <th
-                                                            className="text-center align-middle"
-                                                            style={{
-                                                                background: 'rgba(207,226,255,0.70)'
-                                                            }}
-                                                        >ตลาดไท</th>
-                                                        <th
-                                                            className="text-center align-middle"
-                                                            style={{
-                                                                background: 'rgba(207,226,255,0.70)'
-                                                            }}
-                                                        >ตลาดสี่มุมเมือง</th>
-                                                        <th
-                                                            className="text-center align-middle"
-                                                            style={{
-                                                                background: 'rgba(207,226,255,0.70)'
-                                                            }}
-                                                        >ราคาสำรวจ</th>
+                                                        {showSrimuang && (
+                                                            <th
+                                                                className="text-center align-middle"
+                                                                style={{ background: 'rgba(207,226,255,0.70)' }}
+                                                            >ตลาดศรีเมือง</th>
+                                                        )}
+                                                        {showTai && (
+                                                            <th
+                                                                className="text-center align-middle"
+                                                                style={{ background: 'rgba(207,226,255,0.70)' }}
+                                                            >ตลาดไท</th>
+                                                        )}
+                                                        {showSimummuang && (
+                                                            <th
+                                                                className="text-center align-middle"
+                                                                style={{ background: 'rgba(207,226,255,0.70)' }}
+                                                            >ตลาดสี่มุมเมือง</th>
+                                                        )}
+                                                        {showSurvey && (
+                                                            <th
+                                                                className="text-center align-middle"
+                                                                style={{ background: 'rgba(207,226,255,0.70)' }}
+                                                            >ราคาสำรวจ</th>
+                                                        )}
                                                         <th
                                                             className="text-center align-middle"
                                                             style={{ background: 'rgba(207,226,255,0.70)' }}
@@ -425,10 +430,18 @@ function Showprice() {
                                                                 <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{globalIndex}</td>
                                                                 <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{item.name_pro || '-'}</td>
                                                                 {/* <td>{item. || '-'}</td> */}
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceSrimuang}</td>
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceTai}</td>
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceSimummuang}</td>
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceSurvey}</td>
+                                                                {showSrimuang && (
+                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceSrimuang}</td>
+                                                                )}
+                                                                {showTai && (
+                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceTai}</td>
+                                                                )}
+                                                                {showSimummuang && (
+                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceSimummuang}</td>
+                                                                )}
+                                                                {showSurvey && (
+                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceSurvey}</td>
+                                                                )}
                                                                 <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>บาท&nbsp;/&nbsp;{item.unitname || '-'}</td>
                                                             </tr>
                                                         );
@@ -458,18 +471,37 @@ function Showprice() {
                             })()
                         )}
                     </div>
+
+                    <div className="d-flex flex-wrap gap-2 justify-content-center my-3">
+                        <span className="fw-bold">แสดง/ซ่อนคอลัมน์:</span>
+                        <button type="button" className={`btn btn-sm btn-${showSrimuang ? 'primary' : 'outline-primary'}`} onClick={() => setShowSrimuang(v => !v)}>
+                            ตลาดศรีเมือง
+                        </button>
+                        <button type="button" className={`btn btn-sm btn-${showTai ? 'primary' : 'outline-primary'}`} onClick={() => setShowTai(v => !v)}>
+                            ตลาดไท
+                        </button>
+                        <button type="button" className={`btn btn-sm btn-${showSimummuang ? 'primary' : 'outline-primary'}`} onClick={() => setShowSimummuang(v => !v)}>
+                            ตลาดสี่มุมเมือง
+                        </button>
+                        <button type="button" className={`btn btn-sm btn-${showSurvey ? 'primary' : 'outline-primary'}`} onClick={() => setShowSurvey(v => !v)}>
+                            สำรวจ
+                        </button>
+                    </div>
+                    <br />
+
+                    <button
+                        type="button"
+                        className="btn btn-primary position-fixed"
+                        style={{ bottom: '30px', right: '30px', zIndex: 1000 }}
+                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    >
+                        เลื่อนไปด้านบน
+                    </button>
                 </main>
             </div>
             <br />
             <br />
-            <button
-                type="button"
-                className="btn btn-primary position-fixed"
-                style={{ bottom: '30px', right: '30px', zIndex: 1000 }}
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            >
-                เลื่อนไปด้านบน
-            </button>
+
         </div>
     );
 }

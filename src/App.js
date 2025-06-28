@@ -12,6 +12,8 @@ import Compareprices from './components/Compareprices';
 import VegetablePriceChart from './components/VegetablePriceChart';
 import Insertdata from './components/Insertdata';
 import Showproductconf from './components/Showproductconf';
+import Listwebsite from './components/Listwebsite';
+import Manageproduct from './components/Manageproduct';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 // import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -20,7 +22,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function App() {
   return (
-    <BrowserRouter>
+       <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
@@ -33,6 +35,9 @@ function App() {
         <Route path="/vegetable-chart" element={<VegetablePriceChart data={[]} />} />
         <Route path="/insertdata" element={<Insertdata />} />
         <Route path="/showproductconf" element={<Showproductconf />} />
+        <Route path="/listwebsite" element={<Listwebsite />} />
+        <Route path="/manageproduct" element={<Manageproduct />} />
+        <Route path="/logout" element={<Login />} />
         {/* Add more routes as needed */}
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
