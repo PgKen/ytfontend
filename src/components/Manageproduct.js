@@ -38,7 +38,12 @@ function Manageproduct() {
     setLoading(true);
     setErrorMsg('');
     try {
-      const url = `${Baseurl}/app_manage_product?search=${encodeURIComponent(search)}&page=${pageNum}`;
+      let url = `${Baseurl}/app_manage_product?search=${encodeURIComponent(search)}&page=${pageNum}`;
+      if (search === 'chart_status=1') {
+        url = `${Baseurl}/app_manage_product?chart_status=1&page=${pageNum}`;
+      } else if (search === 'prod_status=1') {
+        url = `${Baseurl}/app_manage_product?prod_status=1&page=${pageNum}`;
+      }
       const res = await axios.get(url);
       setProducts(res.data.data || []);
       setPage(res.data.page || 1);
@@ -208,8 +213,11 @@ function Manageproduct() {
           <form className="w-100 mb-3" style={{ maxWidth: 700 }} onSubmit={handleSearch}>
             <div className="input-group">
               <input type="text" className="form-control" placeholder="ค้นหาชื่อสินค้า..." value={searchText} onChange={e => setSearchText(e.target.value)} />
+              
               <button className="btn btn-primary" type="submit" disabled={loading}>ค้นหา</button>
               <button className="btn btn-outline-secondary" type="button" onClick={() => { setSearchText(''); fetchProducts(''); }} disabled={loading}>รีเซ็ต</button>
+              <button className="btn btn-info" type="button" onClick={() => fetchProducts('chart_status=1')} disabled={loading}>Show Chart</button>
+              <button className="btn btn-success" type="button" onClick={() => fetchProducts('prod_status=1')} disabled={loading}>Show Price</button>
             </div>
           </form>
           <div className="d-flex justify-content-between align-items-center mb-2">

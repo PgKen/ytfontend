@@ -75,7 +75,7 @@ function Listwebsite() {
                 </aside>
                 <main className="col p-4 d-flex flex-column align-items-center justify-content-start">
                     <h4 className="fw-bold mb-2 text-center text-primary kanit-light" style={{ fontSize: 26 }}>แหล่งที่มาเว็บไซต์</h4>
-                    <form className="card mb-4 p-3 shadow-sm" style={{ maxWidth: 500 }} onSubmit={handleSubmit}>
+                    <form className="card mb-4 p-3 shadow-sm" style={{ width: '80%', maxWidth: 800 }} onSubmit={handleSubmit}>
                         <div className="mb-2">
                             <label className="form-label">ชื่อเว็บไซต์</label>
                             <input type="text" className="form-control" name="name_website" value={form.name_website} onChange={handleChange} required />
@@ -96,7 +96,7 @@ function Listwebsite() {
                         {error && <div className="alert alert-danger mt-2">{error}</div>}
                         {success && <div className="alert alert-success mt-2">{success}</div>}
                     </form>
-                    <div className="w-100" style={{ maxWidth: 800 }}>
+                    <div className="w-100" style={{ maxWidth: 1000 }}>
                         {loading ? <div>กำลังโหลด...</div> : (
                             <div className="list-group">
                                 {websites.length === 0 ? <div className="text-center">ไม่พบข้อมูล</div> : websites.map((w, idx) => (

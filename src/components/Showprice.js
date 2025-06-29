@@ -182,6 +182,18 @@ function Showprice() {
     const [showSrimuang, setShowSrimuang] = useState(true);
     const [showSurvey, setShowSurvey] = useState(true);
 
+    const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement);
+    
+    useEffect(() => {
+        function handleFullscreenChange() {
+            setIsFullscreen(!!document.fullscreenElement);
+        }
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        };
+    }, []);
+
     return (
         <div className="container-fluid min-vh-100 bg-light">
             <div className="row">
@@ -194,11 +206,75 @@ function Showprice() {
                         ลงวันที่ {formatThaiDate(date)}
                     </div> */}
                     <div className="row w-100 mb-4">
-                        {/* ... (form code unchanged) ... */}
+                        <div className="col-md-4 mb-2">
+                            <label className="form-label">เลือกชนิด (ประเภทหลัก)</label>
+                            <select
+                                className="form-select"
+                                value={mainTypeValue}
+                                onChange={handleMainTypeChange}
+                            >
+                                <option value="0">-- เลือกทั้งหมด --</option>
+                                {mainTypes.map(type => (
+                                    <option key={type.id} value={type.id}>{type.name_maintype}</option>
+                                ))}
+                            </select>
+                            {mainTypeError && <div className="text-danger small">{mainTypeError}</div>}
+                        </div>
+                        {/* ...existing form code... */}
                     </div>
 
                     <div className="w-100">
+                        {/* ปุ่มขนาดคงที่/อัตโนมัติ */}
+                        <div className="mb-3 d-flex gap-2 justify-content-center">
+                            <button
+                                type="button"
+                                className={`btn btn-sm btn-${tableWidth === 'fixed' ? 'primary' : 'outline-primary'}`}
+                                onClick={() => setTableWidth('fixed')}
+                            >
+                                ขนาดคงที่ 576x1024
+                            </button>
+                            <button
+                                type="button"
+                                className={`btn btn-sm btn-${tableWidth !== 'fixed' ? 'primary' : 'outline-primary'}`}
+                                onClick={() => setTableWidth(100)}
+                            >
+                                ขนาดอัตโนมัติ
+                            </button>
+                            
+                            {/* ปุ่ม Fullscreen Toggle */}
+                            <button
+                                type="button"
+                                className={`btn btn-sm btn-${isFullscreen ? 'danger' : 'success'}`}
+                                onClick={() => {
+                                    const elem = document.documentElement;
+                                    if (!isFullscreen) {
+                                        if (elem.requestFullscreen) {
+                                            elem.requestFullscreen();
+                                        } else if (elem.mozRequestFullScreen) {
+                                            elem.mozRequestFullScreen();
+                                        } else if (elem.webkitRequestFullscreen) {
+                                            elem.webkitRequestFullscreen();
+                                        } else if (elem.msRequestFullscreen) {
+                                            elem.msRequestFullscreen();
+                                        }
+                                    } else {
+                                        if (document.exitFullscreen) {
+                                            document.exitFullscreen();
+                                        } else if (document.mozCancelFullScreen) {
+                                            document.mozCancelFullScreen();
+                                        } else if (document.webkitExitFullscreen) {
+                                            document.webkitExitFullscreen();
+                                        } else if (document.msExitFullscreen) {
+                                            document.msExitFullscreen();
+                                        }
+                                    }
+                                }}
+                            >
+                                {isFullscreen ? 'ออกจากโหมดเต็มจอ' : 'เต็มจอ'}
+                            </button>
+                        </div>
                         <div className="mb-4 d-flex justify-content-end gap-2">
+                            {/*  */}
                             <input
                                 type="date"
                                 className="form-control form-control-sm"
@@ -211,7 +287,11 @@ function Showprice() {
                                 className="btn btn-primary btn-sm"
                                 onClick={() => {
                                     setLoading(true);
-                                    axios.get(`${Baseurl}/app_listproducts`, { params: { date } })
+                                    const params = { date };
+                                    if (mainTypeValue && mainTypeValue !== '0') {
+                                        params.id_maintype = mainTypeValue;
+                                    }
+                                    axios.get(`${Baseurl}/app_listproducts`, { params })
                                         .then(response => {
                                             setDataProducts(response.data);
                                             setLoading(false);
@@ -233,6 +313,7 @@ function Showprice() {
                             >
                                 {showMsg ? 'ซ่อนข้อความ' : 'แสดงข้อความ'}
                             </button>
+{/*  */}
                             <button
                                 type="button"
                                 className="btn btn-outline-secondary btn-sm"
@@ -286,7 +367,8 @@ function Showprice() {
                                 return Object.entries(groupedByMainType).map(([mainType, items]) => (
                                     <div key={mainType} className="mb-5"
                                         style={{
-                                            width: `${tableWidth}%`,
+                                            width: tableWidth === 'fixed' ? '576px' : `${tableWidth}%`,
+                                            height: tableWidth === 'fixed' ? '1024px' : undefined,
                                             transition: 'width 0.3s',
                                             border: '1px solid #CCC',
                                             borderRadius: 8,
@@ -331,8 +413,8 @@ function Showprice() {
                                                     <span className="text-success ms-2"
                                                         style={{
                                                             fontSize: '16px',
-                                                            textAlign: 'right',
-                                                            alignSelf: 'flex-end',
+                                                            // textAlign: 'right',
+                                                            // alignSelf: 'flex-end',
                                                             display: 'block',
                                                             width: '80%',
                                                             backgroundColor: "#e3f0fa",
@@ -355,40 +437,40 @@ function Showprice() {
                                                 >
                                                     <tr>
                                                         <th
-                                                            style={{ background: 'rgba(207,226,255,0.70)' }}
+                                                            style={{ background: 'rgba(207,226,255,0.85)' }}
                                                         >#</th>
                                                         <th
                                                             className="text-center align-middle"
-                                                            style={{ background: 'rgba(207,226,255,0.70)' }}
+                                                            style={{ background: 'rgba(207,226,255,0.85)' }}
                                                         >รายการ</th>
                                                         {/* <th>ประเภทหลัก</th> */}
                                                         {showSrimuang && (
                                                             <th
                                                                 className="text-center align-middle"
-                                                                style={{ background: 'rgba(207,226,255,0.70)' }}
+                                                                style={{ background: 'rgba(207,226,255,0.85)' }}
                                                             >ตลาดศรีเมือง</th>
                                                         )}
                                                         {showTai && (
                                                             <th
                                                                 className="text-center align-middle"
-                                                                style={{ background: 'rgba(207,226,255,0.70)' }}
+                                                                style={{ background: 'rgba(207,226,255,0.85)' }}
                                                             >ตลาดไท</th>
                                                         )}
                                                         {showSimummuang && (
                                                             <th
                                                                 className="text-center align-middle"
-                                                                style={{ background: 'rgba(207,226,255,0.70)' }}
+                                                                style={{ background: 'rgba(207,226,255,0.85)' }}
                                                             >ตลาดสี่มุมเมือง</th>
                                                         )}
                                                         {showSurvey && (
                                                             <th
                                                                 className="text-center align-middle"
-                                                                style={{ background: 'rgba(207,226,255,0.70)' }}
+                                                                style={{ background: 'rgba(207,226,255,0.85)' }}
                                                             >ราคาสำรวจ</th>
                                                         )}
                                                         <th
                                                             className="text-center align-middle"
-                                                            style={{ background: 'rgba(207,226,255,0.70)' }}
+                                                            style={{ background: 'rgba(207,226,255,0.85)' }}
                                                         >หน่วย</th>
                                                     </tr>
                                                 </thead>
@@ -427,22 +509,22 @@ function Showprice() {
 
                                                         const row = (
                                                             <tr key={item.id_product}>
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{globalIndex}</td>
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{item.name_pro || '-'}</td>
+                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{globalIndex}</td>
+                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{item.name_pro || '-'}</td>
                                                                 {/* <td>{item. || '-'}</td> */}
                                                                 {showSrimuang && (
-                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceSrimuang}</td>
+                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{priceSrimuang}</td>
                                                                 )}
                                                                 {showTai && (
-                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceTai}</td>
+                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{priceTai}</td>
                                                                 )}
                                                                 {showSimummuang && (
-                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceSimummuang}</td>
+                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{priceSimummuang}</td>
                                                                 )}
                                                                 {showSurvey && (
-                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>{priceSurvey}</td>
+                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{priceSurvey}</td>
                                                                 )}
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.70)' }}>บาท&nbsp;/&nbsp;{item.unitname || '-'}</td>
+                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>บาท&nbsp;/&nbsp;{item.unitname || '-'}</td>
                                                             </tr>
                                                         );
                                                         globalIndex++;

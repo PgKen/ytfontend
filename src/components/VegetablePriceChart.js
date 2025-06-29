@@ -45,8 +45,9 @@ const VegetablePriceChart = () => {
       try {
         const response = await fetch(`${Baseurl}/app_vegetable-prices?id_result=${selectedResult}`);
         const data = await response.json();
-        setVegetableData(data);
+        setVegetableData(Array.isArray(data) ? data : []); // ป้องกัน error .map
       } catch (error) {
+        setVegetableData([]); // fallback เป็น array ว่าง
         console.error("Error fetching vegetable prices:", error);
       }
     };
