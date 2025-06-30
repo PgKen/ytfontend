@@ -128,12 +128,21 @@ function Uploadimg({ onUpload }) {
                   >
                     <div className="card h-100">
                       <img
-                        src={"http://localhost:4222/upload/" + img.name_img}
-                        // src={"http://localhost:4222/upload/image%20(11)_20250625_212337-528746713.png"}
+                        src={Baseurl + "/upload/" + img.name_img}
                         alt={`img-${img.id}`}
                         className="card-img-top"
                         style={{ objectFit: "cover", height: 150 }}
                       />
+                      <div className="card-body p-2 d-flex justify-content-center">
+                        <a
+                          href={Baseurl + "/upload/" + img.name_img}
+                          download={img.name_img}
+                          className="btn btn-outline-primary btn-sm"
+                          style={{ width: '100%' }}
+                        >
+                          ดาวน์โหลด
+                        </a>
+                      </div>
                     </div>
                   </div>
                 ))}
