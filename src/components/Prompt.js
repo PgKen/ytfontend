@@ -33,6 +33,13 @@ function Prompt() {
             });
     }, []);
 
+     useEffect(() => {
+            document.title = "Prompt | คำสั่ง Prompt";
+        }, []);
+    
+
+
+
     // ฟังก์ชันแปลงวันที่เป็นภาษาไทย
     function formatThaiDate(dateString) {
         if (!dateString) return '-';

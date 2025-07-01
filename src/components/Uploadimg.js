@@ -44,6 +44,11 @@ function Uploadimg({ onUpload }) {
     fetchImages();
   }, [loading]); // reload list after upload
 
+   useEffect(() => {
+          document.title = "Upload img | อัปโหลดรูปภาพ";
+      }, []);
+  
+
   const handleUpload = async () => {
     if (selectedFile) {
       setLoading(true);

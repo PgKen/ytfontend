@@ -105,6 +105,10 @@ function Showprice() {
         }
     }, []);
 
+    useEffect(() => {
+        document.title = "Show Price | ระบบแสดงราคา";
+    }, []);
+
     // State for date input
     const [date, setDate] = React.useState(() => {
         const today = new Date();
@@ -183,7 +187,7 @@ function Showprice() {
     const [showSurvey, setShowSurvey] = useState(true);
 
     const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement);
-    
+
     useEffect(() => {
         function handleFullscreenChange() {
             setIsFullscreen(!!document.fullscreenElement);
@@ -240,7 +244,7 @@ function Showprice() {
                             >
                                 ขนาดอัตโนมัติ
                             </button>
-                            
+
                             {/* ปุ่ม Fullscreen Toggle */}
                             <button
                                 type="button"
@@ -313,7 +317,7 @@ function Showprice() {
                             >
                                 {showMsg ? 'ซ่อนข้อความ' : 'แสดงข้อความ'}
                             </button>
-{/*  */}
+                            {/*  */}
                             <button
                                 type="button"
                                 className="btn btn-outline-secondary btn-sm"

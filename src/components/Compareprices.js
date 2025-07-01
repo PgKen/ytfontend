@@ -27,6 +27,7 @@ function Compareprices() {
   const [results, setResults] = useState([]); // tb_result
   const [selectedResult, setSelectedResult] = useState("1");
   const [showMsg, setShowMsg] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // วันที่วันนี้และเมื่อวาน
   const today = new Date();
@@ -80,6 +81,31 @@ function Compareprices() {
       .catch((error) => {
         console.error("Error fetching image list:", error);
       });
+  }, []);
+
+  useEffect(() => {
+    document.title = "Compare Prices | เปรียบเทียบราคา";
+    // ฟัง event fullscreen change เพื่อ sync state
+    function handleFullscreenChange() {
+      setIsFullscreen(
+        document.fullscreenElement ||
+        document.mozFullScreenElement ||
+        document.webkitFullscreenElement ||
+        document.msFullscreenElement
+          ? true
+          : false
+      );
+    }
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
   }, []);
 
   // ฟังก์ชันแปลงวันที่เป็นภาษาไทย
@@ -146,6 +172,54 @@ function Compareprices() {
             </select>
           </div>
           <div className="w-100">
+            <div className="mb-3 d-flex gap-2 justify-content-center">
+              <button
+                type="button"
+                className={`btn btn-sm btn-${tableWidth === 56.25 ? 'primary' : 'outline-primary'}`}
+                onClick={() => setTableWidth(56.25)}
+              >
+                ขนาดคงที่ 576x1024
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm btn-${tableWidth !== 56.25 ? 'primary' : 'outline-primary'}`}
+                onClick={() => setTableWidth(100)}
+              >
+                ขนาดอัตโนมัติ
+              </button>
+
+              {/* ปุ่ม Fullscreen Toggle */}
+              <button
+                type="button"
+                className={`btn btn-sm btn-${isFullscreen ? 'danger' : 'success'}`}
+                onClick={() => {
+                  const elem = document.documentElement;
+                  if (!isFullscreen) {
+                    if (elem.requestFullscreen) {
+                      elem.requestFullscreen();
+                    } else if (elem.mozRequestFullScreen) {
+                      elem.mozRequestFullScreen();
+                    } else if (elem.webkitRequestFullscreen) {
+                      elem.webkitRequestFullscreen();
+                    } else if (elem.msRequestFullscreen) {
+                      elem.msRequestFullscreen();
+                    }
+                  } else {
+                    if (document.exitFullscreen) {
+                      document.exitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                      document.mozCancelFullScreen();
+                    } else if (document.webkitExitFullscreen) {
+                      document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                      document.msExitFullscreen();
+                    }
+                  }
+                }}
+              >
+                {isFullscreen ? 'ออกจากโหมดเต็มจอ' : 'เต็มจอ'}
+              </button>
+            </div>
             <div className="mb-2 d-flex justify-content-end gap-2">
               <button
                 type="button"
@@ -231,7 +305,6 @@ function Compareprices() {
                         border: "1px solid #CCC",
                         borderRadius: 8,
                         padding: "30px 40px",
-                        // backgroundImage: showBg && dataImges[0]?.name_img ? `url(${Baseurl}/upload/${dataImges[0].name_img})` : 'none',
                         backgroundImage:
                           showBg && dataImges[0]?.name_img
                             ? `url('${Baseurl}/upload/${dataImges[indexImg].name_img}')`
@@ -253,6 +326,7 @@ function Compareprices() {
                             color: "#1a237e",
                             borderRadius: 4,
                             padding: "0 8px",
+                            fontSize: "1.6rem",
                           }}
                         >
                           &nbsp;เปรียบเทียบราคาสินค้า วันนี้ vs เมื่อวาน &nbsp;
@@ -268,14 +342,9 @@ function Compareprices() {
                             padding: "0 8px",
                           }}
                         >
-                          วันนี้: {formatThaiDate(todayStr)} | เมื่อวาน:{" "}
-                          {formatThaiDate(yesterdayStr)}
-
+                          วันนี้: {formatThaiDate(todayStr)} | เมื่อวาน: {formatThaiDate(yesterdayStr)}
                         </span>
-
-
                       </h6>
-
                       <div className="mb-3">
                         {showMsg && (
                           <span className="text-success ms-2"
@@ -294,7 +363,6 @@ function Compareprices() {
                           </span>
                         )}
                       </div>
-
                       <div className="table-responsive" >
                         <table
                           className="table table-bordered table-striped"
@@ -302,142 +370,40 @@ function Compareprices() {
                         >
                           <thead className="table-primary">
                             <tr>
-                              <th
-                                style={{ background: "rgba(207,226,255,0.70)" }}
-                              >
-                                #
-                              </th>
-                              <th
-                                className="text-center align-middle"
-                                style={{ background: "rgba(207,226,255,0.70)" }}
-                              >
-                                รายการ
-                              </th>
-                              <th
-                                className="text-center align-middle"
-                                style={{ background: "rgba(207,226,255,0.70)" }}
-                              >
-                                ราคาวันนี้
-                              </th>
-                              <th
-                                className="text-center align-middle"
-                                style={{ background: "rgba(207,226,255,0.70)" }}
-                              >
-                                ราคาเมื่อวาน
-                              </th>
-                              <th
-                                className="text-center align-middle"
-                                style={{ background: "rgba(207,226,255,0.70)" }}
-                              >
-                                ส่วนต่าง
-                              </th>
-                              <th
-                                className="text-center align-middle"
-                                style={{ background: "rgba(207,226,255,0.70)" }}
-                              >
-                                หน่วย
-                              </th>
+                              <th style={{ background: "rgba(207,226,255,0.70)" }}>#</th>
+                              <th className="text-center align-middle" style={{ background: "rgba(207,226,255,0.70)" }}>รายการ</th>
+                              <th className="text-center align-middle" style={{ background: "rgba(207,226,255,0.70)" }}>ราคาวันนี้</th>
+                              <th className="text-center align-middle" style={{ background: "rgba(207,226,255,0.70)" }}>ราคาเมื่อวาน</th>
+                              <th className="text-center align-middle" style={{ background: "rgba(207,226,255,0.70)" }}>ส่วนต่าง</th>
+                              <th className="text-center align-middle" style={{ background: "rgba(207,226,255,0.70)" }}>หน่วย</th>
                             </tr>
                           </thead>
                           <tbody>
                             {items.map((item) => {
                               const yesterday = yesterdayMap[item.id_product];
-                              const priceToday =
-                                item.result?.find(
-                                  (r) => r.id_result == selectedResult
-                                )?.price ?? "-";
-                              const priceYesterday =
-                                yesterday?.result?.find(
-                                  (r) => r.id_result == selectedResult
-                                )?.price ?? "-";
+                              const priceToday = item.result?.find((r) => r.id_result == selectedResult)?.price ?? "-";
+                              const priceYesterday = yesterday?.result?.find((r) => r.id_result == selectedResult)?.price ?? "-";
                               let diff = "-";
                               let arrow = "";
-                              if (
-                                !isNaN(parseFloat(priceToday)) &&
-                                !isNaN(parseFloat(priceYesterday))
-                              ) {
-                                const diffVal =
-                                  parseFloat(priceToday) -
-                                  parseFloat(priceYesterday);
+                              if (!isNaN(parseFloat(priceToday)) && !isNaN(parseFloat(priceYesterday))) {
+                                const diffVal = parseFloat(priceToday) - parseFloat(priceYesterday);
                                 diff = diffVal.toFixed(2);
                                 if (diffVal > 0) {
-                                  arrow = (
-                                    <span
-                                      style={{
-                                        color: "green",
-                                        fontWeight: "bold",
-                                      }}
-                                    >
-                                      &uarr;
-                                    </span>
-                                  );
+                                  arrow = (<span style={{ color: "green", fontWeight: "bold" }}>&uarr;</span>);
                                 } else if (diffVal < 0) {
-                                  arrow = (
-                                    <span
-                                      style={{
-                                        color: "red",
-                                        fontWeight: "bold",
-                                      }}
-                                    >
-                                      &darr;
-                                    </span>
-                                  );
+                                  arrow = (<span style={{ color: "red", fontWeight: "bold" }}>&darr;</span>);
                                 } else {
-                                  arrow = (
-                                    <span style={{ color: "#888" }}>-</span>
-                                  );
+                                  arrow = (<span style={{ color: "#888" }}>-</span>);
                                 }
                               }
                               const row = (
                                 <tr key={item.id_product}>
-                                  <td
-                                    className="text-center align-middle"
-                                    style={{
-                                      background: "rgba(255,255,255,0.70)",
-                                    }}
-                                  >
-                                    {globalIndex}
-                                  </td>
-                                  <td
-                                    className="text-center align-middle"
-                                    style={{
-                                      background: "rgba(255,255,255,0.70)",
-                                    }}
-                                  >
-                                    {item.name_pro || "-"}
-                                  </td>
-                                  <td
-                                    className="text-center align-middle"
-                                    style={{
-                                      background: "rgba(255,255,255,0.70)",
-                                    }}
-                                  >
-                                    {priceToday}
-                                  </td>
-                                  <td
-                                    className="text-center align-middle"
-                                    style={{
-                                      background: "rgba(255,255,255,0.70)",
-                                    }}
-                                  >
-                                    {priceYesterday}
-                                  </td>
-                                  <td
-                                    className="text-center align-middle"
-                                    style={{
-                                      background: "rgba(255,255,255,0.70)",
-                                    }}
-                                  >
-                                    {diff} {arrow}
-                                  </td>
-                                  <td
-                                    className="text-center align-middle"
-                                    style={{
-                                      background: "rgba(255,255,255,0.70)",
-                                    }}
-                                  >
-                                    บาท&nbsp;/&nbsp;{item.unitname || "-"}
-                                  </td>
+                                  <td className="text-center align-middle" style={{background: "rgba(255,255,255,0.70)"}}>{globalIndex}</td>
+                                  <td className="text-center align-middle" style={{background: "rgba(255,255,255,0.70)"}}>{item.name_pro || "-"}</td>
+                                  <td className="text-center align-middle" style={{background: "rgba(255,255,255,0.70)"}}>{priceToday}</td>
+                                  <td className="text-center align-middle" style={{background: "rgba(255,255,255,0.70)"}}>{priceYesterday}</td>
+                                  <td className="text-center align-middle" style={{background: "rgba(255,255,255,0.70)"}}>{diff} {arrow}</td>
+                                  <td className="text-center align-middle" style={{background: "rgba(255,255,255,0.70)"}}>บาท&nbsp;/&nbsp;{item.unitname || "-"}</td>
                                 </tr>
                               );
                               globalIndex++;
@@ -445,26 +411,6 @@ function Compareprices() {
                             })}
                           </tbody>
                         </table>
-                        <div className="mt-3 text-secondary small text-center"
-                          style={{
-                            background: 'linear-gradient(90deg, #ffe066 0%, #ffd700 100%)',
-                            borderRadius: 8,
-                            padding: '4px 0',
-                            color: '#7a4f01',
-                            fontWeight: 'bold',
-                            letterSpacing: 0.5,
-                            boxShadow: '0 2px 8px rgba(255, 215, 0, 0.15)',
-                            width: '550px',
-                            margin: '0 auto',
-                          }}
-                        >
-
-                          {(() => {
-                            const found = results.find(r => r.id == selectedResult);
-                            return found ? `เปรียบเทียบราคาสินค้าระหว่างวันนี้และเมื่อวาน แหล่งข้อมูลจากเว็ปไซต์ของ ${found.name_result}` : "เปรียบเทียบราคาสินค้าระหว่างวันนี้และเมื่อวาน";
-                          })()}
-
-                        </div>
                       </div>
                     </div>
                   )

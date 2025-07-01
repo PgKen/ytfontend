@@ -34,6 +34,11 @@ function Manageproduct() {
     // eslint-disable-next-line
   }, []);
 
+   useEffect(() => {
+          document.title = "Manageproducts | จัดการข้อมูลสินค้า";
+      }, []);
+  
+
   const fetchProducts = async (search = '', pageNum = 1) => {
     setLoading(true);
     setErrorMsg('');

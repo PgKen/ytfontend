@@ -65,6 +65,11 @@ function Insertdata() {
     // eslint-disable-next-line
   }, [data]);
 
+   useEffect(() => {
+          document.title = "Copy Price | ลงข้อมูลชุดราคา";
+      }, []);
+  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);

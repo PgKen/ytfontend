@@ -38,6 +38,11 @@ const VegetablePriceChart = () => {
     });
   }, []);
 
+   useEffect(() => {
+          document.title = "Chart | กราฟราคา";
+      }, []);
+  
+
   useEffect(() => {
     const fetchData = async () => {
       console.log("Fetching vegetable prices......");

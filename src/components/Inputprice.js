@@ -90,6 +90,10 @@ function InputPrice() {
         }
     }, []);
 
+    useEffect(() => {
+        document.title = "input Price | กรอกราคา";
+    }, []);
+
     // State for date input
     const [date, setDate] = React.useState(() => {
         const today = new Date();
