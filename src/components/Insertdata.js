@@ -26,7 +26,15 @@ function Insertdata() {
   const [updatedNames, setUpdatedNames] = useState([]);
   const [isListening, setIsListening] = useState(false);
   const [micError, setMicError] = useState('');
+  const [marketList, setMarketList] = useState([]);
+  const [marketLoading, setMarketLoading] = useState(false);
+  const [marketError, setMarketError] = useState('');
+  const [searchText, setSearchText] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
   let recognition = null;
+  let searchTimeout = null;
   if (typeof window !== 'undefined') {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -50,6 +58,19 @@ function Insertdata() {
       });
   }, []);
 
+  useEffect(() => {
+    setMarketLoading(true);
+    axios.get(`${Baseurl}/listresult`)
+      .then(res => {
+        setMarketList(res.data || []);
+        setMarketLoading(false);
+      })
+      .catch(() => {
+        setMarketError('เกิดข้อผิดพลาดในการดึงรายการตลาด');
+        setMarketLoading(false);
+      });
+  }, []);
+
   // ตรวจจับคำว่า "บันทึก" ใน textarea แล้ว submit อัตโนมัติ
   useEffect(() => {
     if (!loading && typeof data === 'string' && data.includes('บันทึก')) {
@@ -65,10 +86,9 @@ function Insertdata() {
     // eslint-disable-next-line
   }, [data]);
 
-   useEffect(() => {
-          document.title = "Copy Price | ลงข้อมูลชุดราคา";
-      }, []);
-  
+  useEffect(() => {
+    document.title = "Copy Price | ลงข้อมูลชุดราคา";
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -142,6 +162,65 @@ function Insertdata() {
     setIsListening(false);
   };
 
+  const handleAddMarket = (marketName) => {
+    // เติมชื่อและ - ต่อท้าย ถ้ามีข้อมูลแล้วให้ขึ้นบรรทัดใหม่ จากนั้นเลื่อน cursor ไปท้ายสุด
+    const insertText = (data ? '\n' : '') + marketName + '-';
+    setData(prev => prev ? prev + '\n' + marketName + '-' : marketName + '-');
+    setTimeout(() => {
+      const textarea = document.getElementById('data-input');
+      if (textarea) {
+        textarea.focus();
+        textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+      }
+    }, 0);
+  };
+
+  // ฟังก์ชันค้นหาชื่อสินค้า
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchText(value);
+    setSearchError('');
+    setSearchResults([]);
+    if (searchTimeout) clearTimeout(searchTimeout);
+    if (value.length >= 3) {
+      setSearchLoading(true);
+      searchTimeout = setTimeout(() => {
+        axios.get(`${Baseurl}/app_searchname?q=${encodeURIComponent(value)}`)
+          .then(res => {
+            setSearchResults(res.data || []);
+            setSearchLoading(false);
+          })
+          .catch(() => {
+            setSearchError('เกิดข้อผิดพลาดในการค้นหา');
+            setSearchLoading(false);
+          });
+      }, 350); // debounce 350ms
+    }
+  };
+
+  const handleSelectProduct = (name) => {
+    // เติมชื่อผักต่อท้าย cursor ใน textarea โดยไม่ขึ้นบรรทัดใหม่ และมี - ต่อท้าย
+    const textarea = document.getElementById('data-input');
+    const insertText = name + '-';
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const before = data.substring(0, start);
+      const after = data.substring(end);
+      const newValue = before + insertText + after;
+      setData(newValue);
+      // set cursor ต่อท้ายชื่อที่แทรก
+      setTimeout(() => {
+        textarea.focus();
+        textarea.selectionStart = textarea.selectionEnd = start + insertText.length;
+      }, 0);
+    } else {
+      setData(prev => prev ? prev + insertText : insertText);
+    }
+    setSearchText('');
+    setSearchResults([]);
+  };
+
   return (
     <div className="container-fluid min-vh-100 bg-light">
       <div className="row">
@@ -149,7 +228,7 @@ function Insertdata() {
           <Menu />
         </aside>
         <main className="col p-4 d-flex flex-column align-items-center justify-content-start">
-          <h2 className="display-5 fw-bold mb-4 text-center text-primary kanit-light">Insert Data (Text/Array)</h2>
+          <h2 className="display-5 fw-bold mb-4 text-center text-primary kanit-light" style={{fontSize:"24px"}}>Insert Data</h2>
           <form className="card w-100 shadow-sm mb-4" style={{ maxWidth: 700 }} onSubmit={handleSubmit}>
             <div className="card-body">
               <div className="mb-3">
@@ -176,6 +255,56 @@ function Insertdata() {
                   required
                 />
               </div>
+              {/* ปุ่มเลือกตลาด */}
+              <div className="mb-3">
+                <label className="form-label">เลือกตลาด (คลิกเพื่อเติมในช่องข้อมูล)</label>
+                {marketLoading ? (
+                  <div>กำลังโหลด...</div>
+                ) : marketError ? (
+                  <div className="text-danger">{marketError}</div>
+                ) : (
+                  <div className="d-flex flex-wrap gap-2">
+                    {marketList.map((market, idx) => (
+                      <button
+                        type="button"
+                        key={market.id || idx}
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() => handleAddMarket(market.name_result)}
+                      >
+                        {market.name_result}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+                    <div className="mb-3">
+                <label className="form-label">ค้นหาชื่อผัก (พิมพ์อย่างน้อย 3 ตัวอักษร)</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={searchText}
+                  onChange={handleSearchChange}
+                  placeholder="ค้นหาชื่อผัก..."
+                />
+                {searchLoading && <div className="small text-muted">กำลังค้นหา...</div>}
+                {searchError && <div className="text-danger small">{searchError}</div>}
+                {searchResults.length > 0 && (
+                  <ul className="list-group position-absolute w-100" style={{ zIndex: 10, maxHeight: 200, overflowY: 'auto' }}>
+                    {searchResults.map(prod => (
+                      <li
+                        key={prod.id_product}
+                        className="list-group-item list-group-item-action"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleSelectProduct(prod.name_pro)}
+                      >
+                        {prod.name_pro}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              
               <div className="mb-3">
                 <label htmlFor="data-input" className="form-label">Data (1 บรรทัดต่อ 1 รายการ เช่น ตลาดไท-ผักบุ้งไทย-24-บาท/มัด)</label>
                 <textarea
@@ -195,6 +324,7 @@ function Insertdata() {
                 </button>
                 {micError && <span className="text-danger small">{micError}</span>}
               </div>
+        
               {/* <div className="mb-3">
                 <label className="form-label">รายการผักที่สามารถ Insert/Update ได้</label>
                 {productLoading ? (
@@ -212,6 +342,16 @@ function Insertdata() {
               <button type="submit" className="btn btn-success" disabled={loading || !data}>
                 {loading ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
               </button>
+              {/* ปุ่ม Clear Input */}
+              <button
+                type="button"
+                className="btn btn-secondary ms-2"
+                onClick={() => setData('')}
+                disabled={loading || !data}
+              >
+                ล้างข้อมูล
+              </button>
+              
               {resultMsg && <div className="alert alert-success mt-3">{resultMsg}
                 {(insertedNames.length > 0 || updatedNames.length > 0) && (
                   <div className="mt-2">
