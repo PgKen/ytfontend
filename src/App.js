@@ -14,6 +14,7 @@ import Insertdata from './components/Insertdata';
 import Showproductconf from './components/Showproductconf';
 import Listwebsite from './components/Listwebsite';
 import Manageproduct from './components/Manageproduct';
+import CharacterAnimation from './components/CharacterAnimation';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 // import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -37,7 +38,10 @@ function App() {
         <Route path="/showproductconf" element={<Showproductconf />} />
         <Route path="/listwebsite" element={<Listwebsite />} />
         <Route path="/manageproduct" element={<Manageproduct />} />
+        <Route path="/character-animation" element={<CharacterAnimation />} />
+        {/* Add a route for logout */}
         <Route path="/logout" element={<Login />} />
+
         {/* Add more routes as needed */}
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>

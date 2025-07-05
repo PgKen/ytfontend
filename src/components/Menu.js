@@ -161,6 +161,12 @@ const Menu = () => {
                 >
                     <i className="bi bi-link-45deg me-2"></i> List Website
                 </button>
+                <button
+                    className="btn btn-outline-light text-start mb-2"
+                    onClick={() => window.location.href = "/character-animation"}
+                >
+                    <i className="bi bi-emoji-smile me-2"></i> Character Animation
+                </button>
 
                 <button
                     className="btn btn-outline-danger text-start mt-auto"
