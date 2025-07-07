@@ -15,6 +15,7 @@ import Showproductconf from './components/Showproductconf';
 import Listwebsite from './components/Listwebsite';
 import Manageproduct from './components/Manageproduct';
 import CharacterAnimation from './components/CharacterAnimation';
+import Slideshow from './components/Slideshow';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 // import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -39,6 +40,7 @@ function App() {
         <Route path="/listwebsite" element={<Listwebsite />} />
         <Route path="/manageproduct" element={<Manageproduct />} />
         <Route path="/character-animation" element={<CharacterAnimation />} />
+        <Route path="/slideshow" element={<Slideshow />} />
         {/* Add a route for logout */}
         <Route path="/logout" element={<Login />} />
 

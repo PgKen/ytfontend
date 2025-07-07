@@ -1,0 +1,29 @@
+.fadein-row {
+  opacity: 0;
+  animation: fadein-row-anim 0.7s ease forwards;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* ยกเลิก hover effect ที่แถวสินค้า */
+/*
+.fadein-row:hover {
+  background: #1a237e !important;
+  color: #fff !important;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 12px rgba(26,35,126,0.12);
+  z-index: 2;
+  position: relative;
+  cursor: url('./cur_veg.ico'), pointer;
+}
+
+.fadein-row:hover td {
+  background: transparent !important;
+  color: #fff !important;
+}
+*/
+
+@keyframes fadein-row-anim {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
