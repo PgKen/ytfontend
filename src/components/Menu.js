@@ -161,6 +161,12 @@ const Menu = () => {
                 >
                     <i className="bi bi-link-45deg me-2"></i> List Website
                 </button>
+                <button
+                    className="btn btn-outline-light text-start mb-2"
+                    onClick={() => window.location.href = "/datecompareprices"}
+                >
+                    <i className="bi bi-calendar-range me-2"></i> Date Compare
+                </button>
                 {/* <button
                     className="btn btn-outline-light text-start mb-2"
                     onClick={() => window.location.href = "/character-animation"}

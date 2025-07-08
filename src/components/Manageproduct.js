@@ -26,6 +26,7 @@ function Manageproduct() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [imageFile, setImageFile] = useState(null); // state สำหรับไฟล์รูปภาพ
 
   useEffect(() => {
     axios.get(Baseurl + '/app_maintypes').then(res => setMainTypes(res.data || []));
@@ -50,10 +51,24 @@ function Manageproduct() {
         url = `${Baseurl}/app_manage_product?prod_status=1&page=${pageNum}`;
       }
       const res = await axios.get(url);
-      setProducts(res.data.data || []);
-      setPage(res.data.page || 1);
-      setTotalPages(res.data.totalPages || 1);
-      setTotal(res.data.total || 0);
+      // รองรับทั้งกรณี backend ส่ง { data: [...] } หรือ [...]
+      let productsArr = [];
+      let pageVal = 1, totalPagesVal = 1, totalVal = 0;
+      if (Array.isArray(res.data)) {
+        productsArr = res.data;
+        pageVal = 1;
+        totalPagesVal = 1;
+        totalVal = productsArr.length;
+      } else if (res.data && Array.isArray(res.data.data)) {
+        productsArr = res.data.data;
+        pageVal = res.data.page || 1;
+        totalPagesVal = res.data.totalPages || 1;
+        totalVal = res.data.total || productsArr.length || 0;
+      }
+      setProducts(productsArr);
+      setPage(pageVal);
+      setTotalPages(totalPagesVal);
+      setTotal(totalVal);
     } catch (err) {
       setErrorMsg('เกิดข้อผิดพลาดในการโหลดข้อมูล');
     }
@@ -61,7 +76,11 @@ function Manageproduct() {
   };
 
   const handleInputChange = e => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked, files } = e.target;
+    if (type === 'file') {
+      setImageFile(files[0] || null);
+      return;
+    }
     setForm(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (checked ? 1 : 0) : value
@@ -74,16 +93,32 @@ function Manageproduct() {
     setResultMsg('');
     setErrorMsg('');
     try {
+      const formData = new FormData();
+      for (const key in form) {
+        formData.append(key, form[key]);
+      }
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
       if (editMode) {
         // update
-        await axios.put(`${Baseurl}/app_manage_product/${form.id_product}`, form);
+        await axios.put(`${Baseurl}/app_manage_product/${form.id_product}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
         setResultMsg('แก้ไขข้อมูลสำเร็จ');
       } else {
         // add
-        await axios.post(`${Baseurl}/app_manage_product`, form);
+        await axios.post(`${Baseurl}/app_manage_product`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
         setResultMsg('เพิ่มข้อมูลสำเร็จ');
       }
       setForm({ id_product: '', name_pro: '', id_group: '', name_pro_en: '', name_pro_cn: '', id_unit: '', prod_status: 1, chart_status: 0 });
+      setImageFile(null);
       setEditMode(false);
       fetchProducts(searchText);
     } catch (err) {
@@ -122,6 +157,7 @@ function Manageproduct() {
 
   const handleReset = () => {
     setForm({ id_product: '', name_pro: '', id_group: '', name_pro_en: '', name_pro_cn: '', id_unit: '', prod_status: 1, chart_status: 0 });
+    setImageFile(null);
     setEditMode(false);
     setResultMsg('');
     setErrorMsg('');
@@ -196,6 +232,11 @@ function Manageproduct() {
                     ))}
                   </select>
                 </div>
+                <div className="col-md-6 mb-2">
+                  <label className="form-label">อัปโหลดรูปภาพ</label>
+                  <input type="file" className="form-control" name="image" accept="image/*" onChange={handleInputChange} />
+                  {imageFile && <div className="mt-2"><img src={URL.createObjectURL(imageFile)} alt="preview" style={{maxHeight:80, borderRadius:8}} /></div>}
+                </div>
                 <div className="col-md-3 mb-2 d-flex align-items-center">
                   <label className="form-label me-2">prod_status</label>
                   <input type="checkbox" name="prod_status" checked={!!form.prod_status} onChange={handleInputChange} />
@@ -255,6 +296,7 @@ function Manageproduct() {
                   <th style={{ cursor: 'pointer' }} onClick={() => handleSort('unitname')}>
                     หน่วย {sortConfig.key === 'unitname' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                   </th>
+                  <th>รูปภาพ</th>
                   <th style={{ cursor: 'pointer' }} onClick={() => handleSort('prod_status')}>
                     prod_status {sortConfig.key === 'prod_status' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                   </th>
@@ -278,6 +320,13 @@ function Manageproduct() {
                       <td>{prod.name_pro_en}</td>
                       <td>{prod.name_pro_cn}</td>
                       <td>{prod.unitname}</td>
+                      <td className="text-center">
+                        {prod.img_name ? (
+                          <img src={`${Baseurl}/upload/${prod.img_name}`} alt={prod.name_pro} style={{maxHeight:40, maxWidth:60, borderRadius:6}} />
+                        ) : (
+                          <span className="text-muted">-</span>
+                        )}
+                      </td>
                       <td className="text-center"><input type="checkbox" checked={!!prod.prod_status} readOnly /></td>
                       <td className="text-center"><input type="checkbox" checked={!!prod.chart_status} readOnly /></td>
                       <td>

@@ -3,25 +3,27 @@ import Menu from './Menu'; // Adjust the import path as necessary
 import axios from 'axios';
 import { Baseurl, msg } from './Baseurl'; // Uncomment if you need to use Baseurl
 import './Slideshow.css'; // เพิ่มไฟล์ CSS สำหรับ fade-in
-import img_hot1 from '../assets/img_hot.png'; // Adjust the path as necessary
-import img_green from '../assets/img_green.png'; // Adjust the path as necessary
-import img_celery from '../assets/img_celery.png'; // Adjust the path as necessary
-import img_hot from '../assets/img_hot.png'; // Adjust the path as necessary
-import img_kale from '../assets/img_green2.png'; // Adjust the path as necessary
-import img_cabbage from '../assets/img_cabbage.png'; // Adjust the path as necessary
-import img_lettuce from '../assets/img_lettuce.png'; // Adjust the path as necessary
-import img_glory from '../assets/img_glory.png'; // Adjust the path as necessary
-import img_spinach from '../assets/img_spinach.png'; // Adjust the path as necessary
-import img_kana from '../assets/img_kana.png'; // Adjust the path as necessary
-import img_beans from '../assets/img_beans.png'; // Adjust the path as necessary
-import img_onion from '../assets/img_onion.png'; // Adjust the path as necessary
-import img_coriander from '../assets/img_coriander.png'; // Adjust the path as necessary
-import img_parsley from '../assets/img_parsley.png'; // Adjust the path as necessary
-import img_coriander2 from '../assets/img_coriander2.png'; // Adjust the path as necessary
-import img_leaves from '../assets/img_leaves.png'; // Adjust the path as necessary
-import img_mint from '../assets/img_mint.png'; // Adjust the path as necessary
-import img_basil from '../assets/img_basil.png'; // Adjust the path as necessary
-import img_pepper from '../assets/img_pepper.png'; // Adjust the path as necessary
+// import img_hot1 from '../assets/img_hot.png'; // Adjust the path as necessary
+// import img_green from '../assets/img_green.png'; // Adjust the path as necessary
+// import img_celery from '../assets/img_celery.png'; // Adjust the path as necessary
+// import img_hot from '../assets/img_hot.png'; // Adjust the path as necessary
+// import img_kale from '../assets/img_green2.png'; // Adjust the path as necessary
+// import img_cabbage from '../assets/img_cabbage.png'; // Adjust the path as necessary
+// import img_lettuce from '../assets/img_lettuce.png'; // Adjust the path as necessary
+// import img_glory from '../assets/img_glory.png'; // Adjust the path as necessary
+// import img_spinach from '../assets/img_spinach.png'; // Adjust the path as necessary
+// import img_kana from '../assets/img_kana.png'; // Adjust the path as necessary
+// import img_beans from '../assets/img_beans.png'; // Adjust the path as necessary
+// import img_onion from '../assets/img_onion.png'; // Adjust the path as necessary
+// import img_coriander from '../assets/img_coriander.png'; // Adjust the path as necessary
+// import img_parsley from '../assets/img_parsley.png'; // Adjust the path as necessary
+// import img_coriander2 from '../assets/img_coriander2.png'; // Adjust the path as necessary
+// import img_leaves from '../assets/img_leaves.png'; // Adjust the path as necessary
+// import img_mint from '../assets/img_mint.png'; // Adjust the path as necessary
+// import img_basil from '../assets/img_basil.png'; // Adjust the path as necessary
+// import img_pepper from '../assets/img_pepper.png'; // Adjust the path as necessary
+
+import pak2u from '../assets/pak2u.png'; // Adjust the path as necessary
 
 
 
@@ -35,10 +37,6 @@ function Slideshow() {
     const [loading, setLoading] = React.useState(false);
     const [showMsg, setShowMsg] = useState(false);
     const [showMenu, setShowMenu] = useState(true);
-
-
-
-
 
 
     // Fetch main types from backend
@@ -271,18 +269,36 @@ function Slideshow() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // รวมรูปภาพทั้งหมดไว้ใน array
-    const imgList = [img_green, img_celery, img_kale, img_cabbage, 
-        img_lettuce, img_glory, img_spinach, img_kana, img_beans,
-        img_onion, img_coriander, img_parsley, img_coriander2,
-        img_leaves,img_mint, img_basil,img_pepper
+    // --- Slideshow Box State ---
+    const [slideIndex, setSlideIndex] = useState(0);
 
-    ];
-    // ฟังก์ชันดึง url รูปภาพสินค้า (เลือกตามลำดับ index)
-    function getProductImage(idx) {
-        if (typeof idx !== 'number' || idx < 0) return img_green;
-        return imgList[idx % imgList.length];
-    }
+    // เมื่อ dataProducts เปลี่ยน ให้ reset slideIndex
+    useEffect(() => {
+        setSlideIndex(0);
+    }, [dataProducts]);
+
+    // สร้าง flat array ของสินค้าทั้งหมด (flatten จาก groupedByMainType)
+    const allProductItems = useMemo(() => {
+        return Object.values(groupedByMainType).flat();
+    }, [groupedByMainType]);
+
+    // Auto slide ทุก 2 วินาที
+    useEffect(() => {
+        if (!allProductItems.length) return;
+        const timer = setInterval(() => {
+            setSlideIndex(idx => (idx + 1) % allProductItems.length);
+        }, 2000);
+        return () => clearInterval(timer);
+    }, [allProductItems]);
+
+    // เปลี่ยนภาพพื้นหลังทุก 3 สินค้า
+    useEffect(() => {
+        if (allProductItems.length === 0 || dataImges.length === 0) return;
+        if ((slideIndex + 1) % 3 === 0) {
+            setIndexImg(prev => (prev + 1) % dataImges.length);
+        }
+        // หมายเหตุ: ถ้าอยากให้เปลี่ยนทันทีที่ slideIndex = 0 ด้วย ให้ปรับ logic เพิ่มเติม
+    }, [slideIndex, allProductItems.length, dataImges.length]);
 
     return (
         <div className="container-fluid min-vh-100 bg-light">
@@ -490,7 +506,7 @@ function Slideshow() {
                                     }}
                                 >
                                     <h2 className="mb-3 fw-bold text-primary">
-                                        <span style={{ backgroundColor: '#e3f0fa', color: '#1a237e', borderRadius: 4, padding: '0 8px' }}>
+                                        <span style={{ backgroundColor: '#e3f0fa', color: '#1a237e', borderRadius: 4, padding: '0 8px', fontSize: '24px' }}>
                                             &nbsp;ราคา {mainType}
                                             {(() => {
                                                 const today = new Date();
@@ -531,168 +547,96 @@ function Slideshow() {
                                             )}
                                         </div>
                                     </h4>
-                                    <div className="table-responsive">
-                                        <table
-                                            className="table table-bordered table-striped"
-                                            style={{ background: 'rgba(255,255,255,0.4)' }}
-                                        >
-                                            <thead
-                                                className="table-primary"
-                                            >
-                                                <tr>
-                                                    <th
-                                                        style={{ background: 'rgba(207,226,255,0.85)' }}
-                                                    >#</th>
-                                                    <th
-                                                        className="text-center align-middle"
-                                                        style={{ background: 'rgba(207,226,255,0.85)' }}
-                                                    >รายการ</th>
-                                                    {/* <th>ประเภทหลัก</th> */}
-                                                    {showSrimuang && (
-                                                        <th
-                                                            className="text-center align-middle"
-                                                            style={{ background: 'rgba(207,226,255,0.85)' }}
-                                                        >ตลาดศรีเมือง</th>
-                                                    )}
-                                                    {showTai && (
-                                                        <th
-                                                            className="text-center align-middle"
-                                                            style={{ background: 'rgba(207,226,255,0.85)' }}
-                                                        >ตลาดไท</th>
-                                                    )}
-                                                    {showSimummuang && (
-                                                        <th
-                                                            className="text-center align-middle"
-                                                            style={{ background: 'rgba(207,226,255,0.85)' }}
-                                                        >ตลาดสี่มุมเมือง</th>
-                                                    )}
-                                                    {showSurvey && (
-                                                        <th
-                                                            className="text-center align-middle"
-                                                            style={{ background: 'rgba(207,226,255,0.85)' }}
-                                                        >ราคาสำรวจ</th>
-                                                    )}
-                                                    <th
-                                                        className="text-center align-middle"
-                                                        style={{ background: 'rgba(207,226,255,0.85)' }}
-                                                    >หน่วย</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {items.map((item, idx) => {
-                                                    // เงื่อนไข: แสดงเฉพาะแถวที่ idx < visibleRows[mainType]
-                                                    if (idx >= (visibleRows[mainType] || 0)) return null;
 
-                                                    // เตรียมราคาตามแหล่ง
-                                                    let priceSrimuang = '-';
-                                                    let priceTai = '-';
-                                                    let priceSimummuang = '-';
-                                                    let priceSurvey = '-';
 
-                                                    if (Array.isArray(item.result)) {
-                                                        item.result.forEach(r => {
-                                                            if (r.name_result === 'ตลาดศรีเมือง') {
-                                                                priceSrimuang = r.price ?? '-';
-                                                            } else if (r.name_result === 'ตลาดไท') {
-                                                                priceTai = r.price ?? '-';
-                                                            } else if (r.name_result === 'ตลาดสี่มุมเมือง') {
-                                                                priceSimummuang = r.price ?? '-';
-                                                            } else if (r.name_result === 'สำรวจ') {
-                                                                priceSurvey = r.price ?? '-';
-                                                            }
-                                                        });
-                                                    } else if (item.result && typeof item.result === 'object') {
-                                                        // กรณีเป็น object เดี่ยว
-                                                        if (item.result.name_result === 'ตลาดศรีเมือง') {
-                                                            priceSrimuang = item.result.price ?? '-';
-                                                        } else if (item.result.name_result === 'ตลาดไท') {
-                                                            priceTai = item.result.price ?? '-';
-                                                        } else if (item.result.name_result === 'ตลาดสี่มุมเมือง') {
-                                                            priceSimummuang = item.result.price ?? '-';
-                                                        } else if (item.result.name_result === 'สำรวจ') {
-                                                            priceSurvey = item.result.price ?? '-';
-                                                        }
+                                    {/* --- SLIDESHOW BOX --- */}
+                                    {allProductItems.length === 0 ? (
+                                        <div className="text-center my-4">ไม่พบข้อมูล</div>
+                                    ) : (
+                                        // <div id="boxmain2" className="d-flex justify-content-center align-items-center" style={{ minHeight: 420, width: '100%', border: '1px solid #CCC', borderRadius: 8, padding: '30px 40px', backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                                            {(() => {
+                                                const item = allProductItems[slideIndex];
+                                                // ตรวจสอบและดึงราคาจาก item.result (ถ้ามี)
+                                                let price = '-';
+                                                if (item.result && Array.isArray(item.result)) {
+                                                    // หาราคาตลาดศรีเมืองเป็นค่า default
+                                                    const srimuang = item.result.find(r => r.name_result === 'ตลาดศรีเมือง');
+                                                    if (srimuang && srimuang.price !== undefined && srimuang.price !== null) {
+                                                        price = srimuang.price;
+                                                    } else if (item.result.length > 0 && item.result[0].price !== undefined && item.result[0].price !== null) {
+                                                        price = item.result[0].price;
                                                     }
-
-                                                    const isTooltipActive = activeTooltip.mainType === mainType && activeTooltip.idx === idx;
-                                                    const handleRowClick = () => {
-                                                        if (isTooltipActive) {
-                                                            setActiveTooltip({ mainType: null, idx: null });
-                                                        } else {
-                                                            setActiveTooltip({ mainType, idx });
-                                                        }
-                                                    };
-                                                    return (
-                                                        <React.Fragment key={item.id_product}>
-                                                            <tr className="fadein-row" onClick={handleRowClick} style={{ cursor: 'pointer', position: 'relative' }}>
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{idx + 1}</td>
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{item.name_pro || '-'}</td>
-                                                                {showSrimuang && (
-                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{priceSrimuang}</td>
-                                                                )}
-                                                                {showTai && (
-                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{priceTai}</td>
-                                                                )}
-                                                                {showSimummuang && (
-                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{priceSimummuang}</td>
-                                                                )}
-                                                                {showSurvey && (
-                                                                    <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>{priceSurvey}</td>
-                                                                )}
-                                                                <td className="text-center align-middle" style={{ background: 'rgba(255,255,255,0.85)' }}>บาท&nbsp;/&nbsp;{item.unitname || '-'}</td>
-                                                            </tr>
-                                                            {isTooltipActive && (
-                                                                <tr>
-                                                                    <td colSpan={2 + [showSrimuang, showTai, showSimummuang, showSurvey].filter(Boolean).length} style={{ position: 'relative', padding: 0, border: 'none', background: 'transparent' }}>
-                                                                        <div style={{
-                                                                            position: 'absolute',
-                                                                            left: '60%',
-                                                                            top: -10,
-                                                                            transform: 'translateX(-50%)',
-                                                                            background: '#fffbe7e0',
-                                                                            color: '#1a237e',
-                                                                            border: '2.5px solid #ffd700',
-                                                                            borderRadius: 16,
-                                                                            boxShadow: '0 4px 32px rgba(0,0,0,0.18)',
-                                                                            padding: '40px 60px',
-                                                                            zIndex: 10,
-                                                                            fontWeight: 'bold',
-                                                                            fontSize: 36,
-                                                                            minWidth: 620,
-                                                                            maxWidth: 900,
-                                                                            marginTop: 0,
-                                                                            marginBottom: 0,
-                                                                            marginLeft: 0,
-                                                                            marginRight: 0,
-                                                                            pointerEvents: 'auto',
-                                                                            textAlign: 'center',
-                                                                        }}>
-                                                                            {/* แสดงรูปภาพสินค้า ถ้ามี */}
-                                                                            {typeof getProductImage === 'function' && getProductImage(idx) && (
-                                                                                <img src={getProductImage(idx)} alt={item.name_pro} style={{ maxHeight: 180, maxWidth: 320, marginBottom: 24, borderRadius: 12, boxShadow: '0 2px 12px #ffd70080' }} />
-                                                                            )}
-                                                                            <br />
-                                                                            {item.name_pro || '-'}<br />
-                                                                            ราคา&nbsp;{showSrimuang && priceSrimuang !== '-' ? priceSrimuang : ''}
-                                                                            {showTai && priceTai !== '-' ? ` / ${priceTai}` : ''}
-                                                                            {showSimummuang && priceSimummuang !== '-' ? ` / ${priceSimummuang}` : ''}
-                                                                            {showSurvey && priceSurvey !== '-' ? ` / ${priceSurvey}` : ''}
-                                                                            &nbsp;บาท&nbsp;/ {item.unitname || '-'}
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            )}
-                                                        </React.Fragment>
-                                                    );
-
-                                                })}
-                                            </tbody>
-                                        </table>
-                                    </div> {/* Close table-responsive div here */}
+                                                } else if (item.price !== undefined && item.price !== null) {
+                                                    price = item.price;
+                                                }
+                                                return (
+                                                    <div className="shadow-lg p-4 rounded-4 animate__animated animate__fadeIn" id="boxmain-content"
+                                                        style={{
+                                                            minWidth: 420,
+                                                            maxWidth: 520, 
+                                                            minHeight: 440, // เพิ่มความสูงขั้นต่ำ
+                                                            textAlign: 'center',
+                                                            border: '3px solid #ffd700',
+                                                            position: 'relative',
+                                                            boxShadow: '0 2px 12px #ffd70080',
+                                                            backgroundColor: 'rgba(255,255,255,0.7)', // เพิ่มความโปร่งแสง
+                                                            backdropFilter: 'blur(2px)' // เพิ่มความฟุ้งเล็กน้อย (optional)
+                                                        }}>
+                                                        {/* รูปภาพสินค้า */}
+                                                        {item.img_name ? (
+                                                            <img
+                                                                src={Baseurl + '/upload/' + item.img_name}
+                                                                alt={item.name_pro}
+                                                                style={{ maxHeight: 180, maxWidth: 320, marginBottom: 24, borderRadius: 12, boxShadow: '0 2px 12px #ffd70080' }}
+                                                                onError={e => { e.target.onerror = null; e.target.src = pak2u; }}
+                                                            />
+                                                        ) : (
+                                                            <img
+                                                                src={pak2u}
+                                                                alt="No Image"
+                                                                style={{ maxHeight: 180, maxWidth: 320, marginBottom: 24, borderRadius: 12, boxShadow: '0 2px 12px #ffd70080' }}
+                                                            />
+                                                        )}
+                                                        <h2 className="fw-bold text-primary mb-2">{item.name_pro || '-'}</h2>
+                                                        <div className="mb-2">
+                                                            {(() => {
+                                                                // ดึงราคาตลาดศรีเมืองจาก item.result (ถ้ามี)
+                                                                let priceSrimuang = null;
+                                                                let unitSrimuang = null;
+                                                                if (Array.isArray(item.result)) {
+                                                                    const found = item.result.find(r => r.name_result === 'ตลาดศรีเมือง');
+                                                                    if (found) {
+                                                                        priceSrimuang = found.price;
+                                                                        unitSrimuang = found.unitname || item.unitname;
+                                                                    }
+                                                                }
+                                                                // ถ้าไม่มีราคาตลาดศรีเมือง ให้ fallback เป็น item.price
+                                                                const showPrice = priceSrimuang !== undefined && priceSrimuang !== null && priceSrimuang !== '-' ? priceSrimuang : item.price;
+                                                                const showUnit = unitSrimuang || item.unitname || '';
+                                                                return (
+                                                                    <span className="badge bg-info text-dark me-2" style={{ fontSize: '28px' }}>
+                                                                        {showPrice !== undefined && showPrice !== null && showPrice !== '-' ? `ราคา ${showPrice} บาท / ${showUnit}` : (showUnit ? `บาท / ${showUnit}` : '')}
+                                                                    </span>
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                        <div className="mt-3 small text-secondary">ลงวันที่ {formatThaiDate(date)}</div>
+                                                        <div className="position-absolute top-0 end-0 p-2">
+                                                            <span className="badge bg-warning text-dark">{slideIndex + 1} / {allProductItems.length}</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+                                        // </div>
+                                    )}
+                                    {/* --- END SLIDESHOW BOX --- */}
                                 </div> /* Close mainType group div here */
                             ))
                         )}
                     </div>
+
                 </main>
             </div>
         </div>

@@ -86,10 +86,16 @@ function Showprice() {
         console.log('Fetching products from backend...');
         axios.get(Baseurl + '/app_listproducts')
             .then(response => {
-                // console.log('Fetched products Length:', response.data.length);
-                // console.log('Fetched products:', response.data);
-                setDataProducts(response.data);
-
+                // ตรวจสอบโครงสร้างข้อมูลที่ได้จาก backend
+                let products = [];
+                if (Array.isArray(response.data)) {
+                    products = response.data;
+                } else if (response.data && Array.isArray(response.data.data)) {
+                    products = response.data.data;
+                } else {
+                    console.error('Unexpected response structure:', response.data);
+                }
+                setDataProducts(products);
             })
             .catch(error => {
                 console.error('Error fetching products:', error);
@@ -480,6 +486,8 @@ function Showprice() {
                                                 </thead>
                                                 <tbody>
                                                     {items.map((item) => {
+                                                        // LOG: ตรวจสอบข้อมูล result ที่ได้จาก backend
+                                                        console.log('item.result:', item.result);
                                                         // เตรียมราคาตามแหล่ง
                                                         let priceSrimuang = '-';
                                                         let priceTai = '-';
