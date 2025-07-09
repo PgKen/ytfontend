@@ -10,6 +10,7 @@ import Uploadimg from './components/Uploadimg';
 import Prompt from './components/Prompt';
 import Compareprices from './components/Compareprices';
 import Datecompareprices from './components/Datecompareprices';
+import Datecomparepricesslideshow from './components/Datecomparepricesslideshow';
 import VegetablePriceChart from './components/VegetablePriceChart';
 import Insertdata from './components/Insertdata';
 import Showproductconf from './components/Showproductconf';
@@ -17,6 +18,8 @@ import Listwebsite from './components/Listwebsite';
 import Manageproduct from './components/Manageproduct';
 import CharacterAnimation from './components/CharacterAnimation';
 import Slideshow from './components/Slideshow';
+import Slideshow2 from './components/Slideshow2';
+
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 // import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -36,13 +39,15 @@ function App() {
         <Route path="/prompt" element={<Prompt />} />
         <Route path="/compareprices" element={<Compareprices />} />
         <Route path="/datecompareprices" element={<Datecompareprices />} />
+        <Route path="/datecomparepricesslideshow" element={<Datecomparepricesslideshow />} />
         <Route path="/vegetable-chart" element={<VegetablePriceChart data={[]} />} />
         <Route path="/insertdata" element={<Insertdata />} />
         <Route path="/showproductconf" element={<Showproductconf />} />
         <Route path="/listwebsite" element={<Listwebsite />} />
         <Route path="/manageproduct" element={<Manageproduct />} />
         <Route path="/character-animation" element={<CharacterAnimation />} />
-        <Route path="/slideshow" element={<Slideshow />} />
+        <Route path="/slideshow2" element={<Slideshow />} />
+        <Route path="/slideshow" element={<Slideshow2 />} />
         {/* Add a route for logout */}
         <Route path="/logout" element={<Login />} />
 
