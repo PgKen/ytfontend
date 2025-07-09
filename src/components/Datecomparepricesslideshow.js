@@ -625,7 +625,7 @@ function DatecomparepricesSlideshow() {
                     minWidth: 320,
                     maxWidth: 1000,
                     margin: '10 auto',
-                    padding : 16, // หรือ padding: '32px 16px' ตามต้องการ
+                    padding : 8, // หรือ padding: '32px 16px' ตามต้องการ
                     overflow: "hidden",
                     backgroundImage:
                       showBg && dataImges[0]?.name_img
