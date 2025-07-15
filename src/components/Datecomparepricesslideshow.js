@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
+
 import Menu from "./Menu";
 import axios from "axios";
 import { Baseurl, msg } from "./Baseurl";
@@ -8,6 +9,8 @@ import gsap from "gsap";
 
 
 function DatecomparepricesSlideshow() {
+    const [mainTypes, setMainTypes] = useState([]); // tb_maintype
+  const [selectedMainType, setSelectedMainType] = useState("");
   // --- State ---
   const captureRef = useRef();
   const boxRef = useRef();
@@ -59,6 +62,10 @@ function DatecomparepricesSlideshow() {
 
   // --- Fetch Data ---
   useEffect(() => {
+    axios.get(`${Baseurl}/app_maintypes`).then((res) => {
+      setMainTypes(res.data);
+      if (res.data.length > 0) setSelectedMainType(res.data[0].id);
+    });
     axios.get(`${Baseurl}/app_result`).then((res) => setResults(res.data));
     axios
       .get(Baseurl + "/app_listimg")
@@ -95,7 +102,7 @@ function DatecomparepricesSlideshow() {
     setSubmitted(true);
     axios
       .get(Baseurl + "/app_listproducts_startdate", {
-        params: { id_result: selectedResult, date: date1 },
+        params: { id_result: selectedResult, date: date1, id_maintype: selectedMainType },
       })
       .then((response) => {
         setDataToday(response.data);
@@ -107,7 +114,7 @@ function DatecomparepricesSlideshow() {
       });
     axios
       .get(Baseurl + "/app_listproducts_enddate", {
-        params: { date: date2, id_result: selectedResult },
+        params: { date: date2, id_result: selectedResult, id_maintype: selectedMainType },
       })
       .then((response) => setDataYesterday(response.data))
       .catch((error) => {
@@ -392,23 +399,35 @@ function DatecomparepricesSlideshow() {
             {/* --- Controls --- */}
             <div className="mb-2 d-flex justify-content-end gap-2 align-items-end flex-wrap">
               <div className="d-flex gap-1 align-items-end">
-                <div>
-                  <label htmlFor="result-select" className="form-label mb-1">
-                    แหล่งที่มา
-                  </label>
-                  <select
-                    id="result-select"
-                    className="form-select form-select-sm"
-                    style={{ minWidth: 140 }}
-                    value={selectedResult}
-                    onChange={(e) => setSelectedResult(e.target.value)}
-                  >
-                    {results.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.name_result}
-                      </option>
-                    ))}
-                  </select>
+                <div className="d-flex gap-2 align-items-end">
+                  <div>
+                    <label htmlFor="maintype-select" className="form-label mb-1">ประเภท</label>
+                    <select
+                      id="maintype-select"
+                      className="form-select form-select-sm"
+                      style={{ minWidth: 140 }}
+                      value={selectedMainType}
+                      onChange={(e) => setSelectedMainType(e.target.value)}
+                    >
+                      {mainTypes.map((type) => (
+                        <option key={type.id} value={type.id}>{type.name_maintype}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="result-select" className="form-label mb-1">แหล่งที่มา</label>
+                    <select
+                      id="result-select"
+                      className="form-select form-select-sm"
+                      style={{ minWidth: 140 }}
+                      value={selectedResult}
+                      onChange={(e) => setSelectedResult(e.target.value)}
+                    >
+                      {results.map((r) => (
+                        <option key={r.id} value={r.id}>{r.name_result}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 <div>
                   <label className="form-label mb-1">วันที่ 1</label>

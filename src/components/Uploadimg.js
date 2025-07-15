@@ -34,7 +34,7 @@ function Uploadimg({ onUpload }) {
         const response = await axios.get(`${Baseurl}/app_listimg`);
         console.log("Images fetched:", response.data);
         
-        setImages(response.data || []);
+        setImagesSorted(response.data);
       } catch (error) {
         setImages([]);
       } finally {
@@ -78,6 +78,57 @@ function Uploadimg({ onUpload }) {
         setLoading(false);
       }
     }
+  };
+
+  const handleDeleteImage = async (id) => {
+    if (!window.confirm('คุณต้องการลบรูปภาพนี้ใช่หรือไม่?')) return;
+    try {
+      setListLoading(true);
+      await axios.delete(`${Baseurl}/app_deleteimg/${id}`);
+      // รีเฟรชรายการรูปภาพ
+      const response = await axios.get(`${Baseurl}/app_listimg`);
+      setImagesSorted(response.data);
+      setListLoading(false);
+    } catch (err) {
+      setListLoading(false);
+      alert('เกิดข้อผิดพลาดในการลบรูปภาพ');
+    }
+  };
+
+  const handleChangeOrder = async (id, targetOrder) => {
+    try {
+      const currentIdx = images.findIndex(img => img.id === id);
+      if (currentIdx === -1) return;
+      let targetIdx = null;
+      if (targetOrder !== undefined) {
+        targetIdx = images.findIndex(img => img.id_order === targetOrder && img.id !== id);
+      }
+      if (targetIdx === -1 || targetIdx === null) {
+        if (targetOrder === images[currentIdx - 1]?.id_order && currentIdx > 0) {
+          targetIdx = currentIdx - 1;
+        } else if (targetOrder === images[currentIdx + 1]?.id_order && currentIdx < images.length - 1) {
+          targetIdx = currentIdx + 1;
+        }
+      }
+      if (targetIdx === null || targetIdx === -1) return;
+      const currentImage = images[currentIdx];
+      const targetImage = images[targetIdx];
+      if (!currentImage || !targetImage) {
+        alert('ข้อมูลลำดับรูปภาพไม่ถูกต้อง');
+        return;
+      }
+      // เรียก backend สลับลำดับภาพใน transaction เดียว
+      await axios.put(`${Baseurl}/app_swapimgorder`, { id1: currentImage.id, id2: targetImage.id });
+      // รีเฟรชรายการรูปภาพ
+      const response = await axios.get(`${Baseurl}/app_listimg`);
+      setImagesSorted(response.data);
+    } catch (err) {
+      alert('เกิดข้อผิดพลาดในการเปลี่ยนลำดับรูปภาพ');
+    }
+  };
+
+  const setImagesSorted = (data) => {
+    setImages((data || []).sort((a, b) => ((a.id_order ?? a.id ?? 0) - (b.id_order ?? b.id ?? 0))));
   };
 
   return (
@@ -126,19 +177,16 @@ function Uploadimg({ onUpload }) {
               <div>ไม่มีรูปภาพ</div>
             ) : (
               <div className="row">
-                {images.map((img) => (
-                  <div
-                    key={img.id_img}
-                    className="col-6 col-md-4 col-lg-3 mb-3"
-                  >
+                {images.map((img, idx) => (
+                  <div key={img.id} className="col-6 col-md-4 col-lg-3 mb-3">
                     <div className="card h-100">
-                      <img
-                        src={Baseurl + "/upload/" + img.name_img}
-                        alt={`img-${img.id}`}
+                        <img
+                          src={Baseurl + "/upload/" + img.name_img}
+                          alt={`img-${img.id}`}
                         className="card-img-top"
                         style={{ objectFit: "cover", height: 150 }}
                       />
-                      <div className="card-body p-2 d-flex justify-content-center">
+                      <div className="card-body p-2 d-flex flex-column align-items-center gap-2">
                         <a
                           href={Baseurl + "/upload/" + img.name_img}
                           download={img.name_img}
@@ -147,6 +195,30 @@ function Uploadimg({ onUpload }) {
                         >
                           ดาวน์โหลด
                         </a>
+                        <button
+                          type="button"
+                          className="btn btn-outline-danger btn-sm"
+                          style={{ width: '100%' }}
+                          onClick={() => handleDeleteImage(img.id)}
+                        >
+                          ลบรูปภาพ
+                        </button>
+                        <div className="d-flex w-100 justify-content-between mt-2">
+                          <button
+                            className="btn btn-outline-secondary btn-sm"
+                            disabled={idx === 0}
+                            onClick={() => handleChangeOrder(img.id, images[idx - 1]?.id_order)}
+                          >
+                            ▲ ขึ้น
+                          </button>
+                          <button
+                            className="btn btn-outline-secondary btn-sm"
+                            disabled={idx === images.length - 1}
+                            onClick={() => handleChangeOrder(img.id, images[idx + 1]?.id_order)}
+                          >
+                            ▼ ลง
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

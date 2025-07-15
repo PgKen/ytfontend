@@ -29,6 +29,8 @@ import gsap from "gsap";
 
 
 function Slideshow() {
+    // State สำหรับควบคุมการเริ่ม slideshow
+    const [isStarted, setIsStarted] = useState(false);
 
     // State for main types
     const [mainTypes, setMainTypes] = React.useState([]);
@@ -305,13 +307,11 @@ function Slideshow() {
 
     // Auto slide ตาม hold time (delayValue + 2 วินาที)
     useEffect(() => {
-        if (!allProductItems.length) return;
-        // เพิ่ม 2 วินาทีเข้าไปใน delayValue
+        if (!allProductItems.length || !isStarted) return;
         const intervalMs = delayValue > 0 ? (delayValue + 2) * 1000 : 2000;
         const timer = setInterval(() => {
             setSlideIndex(idx => {
                 const nextIdx = (idx + 1) % allProductItems.length;
-                // เปลี่ยนภาพ background ทุก 3 สินค้า
                 if (dataImges.length > 0 && (nextIdx % 3 === 0)) {
                     setIndexImg(imgIdx => (imgIdx + 1) % dataImges.length);
                 }
@@ -319,7 +319,7 @@ function Slideshow() {
             });
         }, intervalMs);
         return () => clearInterval(timer);
-    }, [allProductItems, delayValue, dataImges.length]);
+    }, [allProductItems, delayValue, dataImges.length, isStarted]);
 
     // --- ปรับ: ไม่ต้องหน่วงเวลา (delay) ตอนเปลี่ยนภาพ ให้แสดงผลทันที ---
     // ปรับ delay ของ gsapOpts เป็น 0 ตอน slideIndex เปลี่ยน
@@ -613,15 +613,24 @@ function Slideshow() {
                                 + เพิ่มความกว้าง
                             </button>
 
-                            {/* ปุ่มแสดง/ซ่อนพื้นหลัง */}
-                            <button
-                                type="button"
-                                className={`btn btn-${showBg ? 'danger' : 'success'} btn-sm`}
-                                onClick={() => setShowBg(v => !v)}
-                                style={{ minWidth: 110 }}
-                            >
-                                {showBg ? 'ปิดพื้นหลัง' : 'แสดงพื้นหลัง'}
-                            </button>
+                        {/* ปุ่มเริ่ม Slide Show */}
+                        <button
+                            type="button"
+                            className={`btn btn-${isStarted ? 'danger' : 'success'} btn-sm`}
+                            onClick={() => setIsStarted(v => !v)}
+                            style={{ minWidth: 110 }}
+                        >
+                            {isStarted ? 'หยุด Slide Show' : 'Start Slide Show'}
+                        </button>
+                        {/* ปุ่มแสดง/ซ่อนพื้นหลัง */}
+                        <button
+                            type="button"
+                            className={`btn btn-${showBg ? 'danger' : 'success'} btn-sm`}
+                            onClick={() => setShowBg(v => !v)}
+                            style={{ minWidth: 110 }}
+                        >
+                            {showBg ? 'ปิดพื้นหลัง' : 'แสดงพื้นหลัง'}
+                        </button>
 
                             {/* ปุ่มเปลี่ยนรูปพื้นหลัง */}
                             <button
